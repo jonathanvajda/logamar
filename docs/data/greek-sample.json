@@ -1,0 +1,74 @@
+[
+  {
+    "id": "G25",
+    "language": "greek",
+    "lemma": "ἀγαπάω",
+    "transliteration": "agapaō",
+    "glosses": ["love", "to love"],
+    "partOfSpeech": "verb",
+    "frequency": 143,
+    "sourceRefs": ["Matt 5:43"],
+    "morphologyHints": ["Contract verb ending in -αω"],
+    "exampleRefs": ["John 3:16"]
+  },
+  {
+    "id": "G3056",
+    "language": "greek",
+    "lemma": "λόγος",
+    "transliteration": "logos",
+    "glosses": ["word", "message", "account"],
+    "partOfSpeech": "noun",
+    "frequency": 330,
+    "sourceRefs": ["John 1:1"],
+    "morphologyHints": ["Masculine second declension noun"],
+    "exampleRefs": ["John 1:14"]
+  },
+  {
+    "id": "G4102",
+    "language": "greek",
+    "lemma": "πίστις",
+    "transliteration": "pistis",
+    "glosses": ["faith", "faithfulness", "trust"],
+    "partOfSpeech": "noun",
+    "frequency": 243,
+    "sourceRefs": ["Rom 1:17"],
+    "morphologyHints": ["Feminine third declension noun"],
+    "exampleRefs": ["Heb 11:1"]
+  },
+  {
+    "id": "G5485",
+    "language": "greek",
+    "lemma": "χάρις",
+    "transliteration": "charis",
+    "glosses": ["grace", "favor", "gift"],
+    "partOfSpeech": "noun",
+    "frequency": 156,
+    "sourceRefs": ["Luke 1:30"],
+    "morphologyHints": ["Feminine third declension noun"],
+    "exampleRefs": ["Eph 2:8"]
+  },
+  {
+    "id": "G1510",
+    "language": "greek",
+    "lemma": "εἰμί",
+    "transliteration": "eimi",
+    "glosses": ["be", "to be", "am"],
+    "partOfSpeech": "verb",
+    "frequency": 2462,
+    "sourceRefs": ["John 8:58"],
+    "morphologyHints": ["Irregular verb"],
+    "exampleRefs": ["Mark 14:62"]
+  },
+  {
+    "id": "G2532",
+    "language": "greek",
+    "lemma": "καί",
+    "transliteration": "kai",
+    "glosses": ["and", "also", "even"],
+    "partOfSpeech": "conjunction",
+    "frequency": 9161,
+    "sourceRefs": ["Matt 1:2"],
+    "morphologyHints": ["Coordinating conjunction"],
+    "exampleRefs": ["John 1:1"]
+  }
+]

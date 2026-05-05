@@ -1,0 +1,74 @@
+[
+  {
+    "id": "H559",
+    "language": "hebrew",
+    "lemma": "אָמַר",
+    "transliteration": "amar",
+    "glosses": ["say", "speak", "to say"],
+    "partOfSpeech": "verb",
+    "frequency": 5317,
+    "sourceRefs": ["Gen 1:3"],
+    "morphologyHints": ["Qal verb root"],
+    "exampleRefs": ["Gen 12:1"]
+  },
+  {
+    "id": "H430",
+    "language": "hebrew",
+    "lemma": "אֱלֹהִים",
+    "transliteration": "elohim",
+    "glosses": ["God", "gods"],
+    "partOfSpeech": "noun",
+    "frequency": 2601,
+    "sourceRefs": ["Gen 1:1"],
+    "morphologyHints": ["Plural form often used with singular meaning for Israel's God"],
+    "exampleRefs": ["Deut 6:4"]
+  },
+  {
+    "id": "H7225",
+    "language": "hebrew",
+    "lemma": "רֵאשִׁית",
+    "transliteration": "reshit",
+    "glosses": ["beginning", "first"],
+    "partOfSpeech": "noun",
+    "frequency": 51,
+    "sourceRefs": ["Gen 1:1"],
+    "morphologyHints": ["Feminine noun"],
+    "exampleRefs": ["Prov 1:7"]
+  },
+  {
+    "id": "H7965",
+    "language": "hebrew",
+    "lemma": "שָׁלוֹם",
+    "transliteration": "shalom",
+    "glosses": ["peace", "well-being", "wholeness"],
+    "partOfSpeech": "noun",
+    "frequency": 237,
+    "sourceRefs": ["Gen 15:15"],
+    "morphologyHints": ["Masculine noun"],
+    "exampleRefs": ["Num 6:26"]
+  },
+  {
+    "id": "H4428",
+    "language": "hebrew",
+    "lemma": "מֶלֶךְ",
+    "transliteration": "melek",
+    "glosses": ["king"],
+    "partOfSpeech": "noun",
+    "frequency": 2523,
+    "sourceRefs": ["Gen 14:1"],
+    "morphologyHints": ["Masculine segolate noun"],
+    "exampleRefs": ["1 Sam 8:5"]
+  },
+  {
+    "id": "H8085",
+    "language": "hebrew",
+    "lemma": "שָׁמַע",
+    "transliteration": "shama",
+    "glosses": ["hear", "listen", "obey"],
+    "partOfSpeech": "verb",
+    "frequency": 1159,
+    "sourceRefs": ["Gen 3:8"],
+    "morphologyHints": ["Qal verb root"],
+    "exampleRefs": ["Deut 6:4"]
+  }
+]

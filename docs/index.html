@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Logamar</title>
+    <link rel="stylesheet" href="./css/styles.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <a class="brand" href="#/">
+        <span class="brand-mark">Λ</span>
+        <span>
+          <strong>Logamar</strong>
+          <small>Greek and Hebrew vocabulary</small>
+        </span>
+      </a>
+      <nav class="top-nav" aria-label="Primary">
+        <a href="#/">Dashboard</a>
+        <a href="#/setup">Study</a>
+        <a href="#/browser">Terms</a>
+        <a href="#/report">Progress</a>
+        <a href="#/settings">Import / Export</a>
+      </nav>
+    </header>
+
+    <main id="app" class="app-shell" tabindex="-1">
+      <section class="loading-panel">
+        <p>Loading Logamar...</p>
+      </section>
+    </main>
+
+    <template id="empty-state-template">
+      <section class="empty-state">
+        <h1></h1>
+        <p></p>
+      </section>
+    </template>
+
+    <script type="module" src="./js/app.js"></script>
+  </body>
+</html>

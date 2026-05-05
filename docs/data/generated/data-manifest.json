@@ -1,0 +1,16 @@
+{
+  "counts": {
+    "duplicateStrongNumbers": 4,
+    "greekTerms": 5542,
+    "greekWordListEntriesWithInvalidStrong": 1,
+    "greekWordListEntriesWithoutStrong": 10809
+  },
+  "generator": "tools/convert_openscriptures.py",
+  "sources": [
+    {
+      "bytes": 1662647,
+      "path": "openscriptures/GreekResources/GreekWordList.js",
+      "sha256": "84703d5de9fae423c141ff374ffab73fcda288d0a400fcd500445302a5dbe483"
+    }
+  ]
+}
