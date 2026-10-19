@@ -354,8 +354,19 @@ button:disabled {
 
 .setup-form {
   display: grid;
-  gap: 20px;
+  grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+  gap: 24px 32px;
+  align-items: start;
 }
+
+.setup-settings { display: grid; gap: 20px; min-width: 0; }
+.setup-settings .option-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+.setup-settings .field { align-content: start; }
+.setup-settings .field > span { font-weight: 700; }
+.setup-parts { min-width: 0; padding-left: 24px !important; border-left: 1px solid var(--line) !important; }
+.setup-parts .checkboxes { display: grid; grid-template-columns: 1fr; gap: 6px; }
+.setup-parts .check-pill { width: 100%; }
+.setup-form > .form-actions { grid-column: 1 / -1; }
 
 .option-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -530,6 +541,9 @@ button:disabled {
 }
 
 @media (max-width: 860px) {
+  .setup-form { grid-template-columns: 1fr; }
+  .setup-parts { padding-left: 0 !important; border-left: 0 !important; }
+  .setup-parts .checkboxes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .app-header,
   .hero,
   .session-layout {
@@ -567,6 +581,8 @@ button:disabled {
 }
 
 @media (max-width: 560px) {
+  .setup-settings .option-grid { grid-template-columns: 1fr; }
+  .setup-parts .checkboxes { grid-template-columns: 1fr; }
   .stats-grid,
   .option-grid {
     grid-template-columns: 1fr;

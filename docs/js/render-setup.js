@@ -11,6 +11,7 @@ export function renderSetup({ terms, progressRows = [], defaults = {}, selectedI
       <h1>Choose your flashcards.</h1>
       <p class="lead">Choose a progress pool, then set the size and order of your session.</p>
       <form id="setup-form" class="setup-form">
+        <div class="setup-settings">
         <div class="option-grid">
           <label class="field">
             <span>Language</span>
@@ -50,17 +51,6 @@ export function renderSetup({ terms, progressRows = [], defaults = {}, selectedI
             <small>Most common first introduces frequent words first while keeping review cards in your session.</small>
           </label>
         </div>
-        <fieldset class="checkbox-group">
-          <legend>Parts of speech</legend>
-          <div class="checkboxes">
-            ${posOptions.map((pos) => `
-              <label class="check-pill">
-                <input type="checkbox" name="partOfSpeech" value="${pos}" checked>
-                <span>${formatPosLabel(pos)} (${counts.get(pos)})</span>
-              </label>
-            `).join("")}
-          </div>
-        </fieldset>
         <div class="option-grid">
           <label class="field">
             <span>Session type</span>
@@ -77,6 +67,18 @@ export function renderSetup({ terms, progressRows = [], defaults = {}, selectedI
             <small>Dictionary mode groups reviewed Strong’s inflections under their headword. Hard mode keeps their separate forms and meanings. Hebrew and Aramaic are unchanged.</small>
           </label>
         </div>
+        </div>
+        <fieldset class="checkbox-group setup-parts">
+          <legend>Parts of speech</legend>
+          <div class="checkboxes">
+            ${posOptions.map((pos) => `
+              <label class="check-pill">
+                <input type="checkbox" name="partOfSpeech" value="${pos}" checked>
+                <span>${formatPosLabel(pos)} (${counts.get(pos)})</span>
+              </label>
+            `).join("")}
+          </div>
+        </fieldset>
         <div class="form-actions">
           <button type="submit">Start session</button>
           <a class="button secondary" href="#/">Cancel</a>
