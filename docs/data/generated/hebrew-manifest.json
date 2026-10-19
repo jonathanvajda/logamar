@@ -1,11 +1,15 @@
 {
-  "changes": "TBESH: retain columns eStrong through Gloss; omit Meaning entirely. TAHOT: retain only primary word-row reference, dStrongs, and grammar; omit text, translations, interlinear duplicates and variant-detail columns. TAHOT primary word rows; Qere followed; L/Q/R/V and other main readings retained; X (reconstructed LXX additions) excluded; lexical roots only; bound affixes/punctuation (H9000+) excluded; identical root continuations after + counted once; dStrong senses aggregated to eStrong IDs, preserving eStrong suffixes; alternate-detail and interlinear rows not counted. Unicode whitespace normalized; gloss HTML entities decoded; senses merged by eStrong, alternate forms retained. Study gloss uses the first source entry's head before a colon; all original short glosses remain in glosses. No long definitions imported.",
+  "changes": "TBESH: retain columns eStrong through Gloss; omit Meaning entirely. TAHOT: retain only primary word-row reference, dStrongs, and grammar; omit text, translations, interlinear duplicates and variant-detail columns. TAHOT primary word rows; Qere followed; L/Q/R/V and other main readings retained; X (reconstructed LXX additions) excluded; lexical roots only; bound affixes/punctuation (H9000+) excluded; identical root continuations after + counted once; dStrong senses aggregated to eStrong IDs, preserving eStrong suffixes; alternate-detail and interlinear rows not counted. Unicode whitespace normalized; gloss HTML entities decoded; senses merged by eStrong, alternate forms retained. Study gloss uses the first source entry's head before a colon; all original short glosses remain in glosses. Explicit TBESH A: entries are separated into aramaic.json with unchanged IDs. Shared/proper names without explicit Aramaic identification remain in the Hebrew collection. No long definitions imported.",
   "counts": {
     "occurrences": 298656,
     "termCount": 9296,
     "termsWithFrequency": 9109
   },
   "generator": "tools/build_hebrew.py",
+  "languageCounts": {
+    "aramaic": 655,
+    "hebrew": 8641
+  },
   "mappingOverrides": {
     "bytes": 495,
     "path": "src/stepbible/mapping-overrides.json",
@@ -14,19 +18,23 @@
   "outputs": [
     {
       "path": "docs/data/generated/hebrew.json",
-      "sha256": "44fa25dc175f3bc112061e33459e476213fe9459ad792dab8237d47694ee492d"
+      "sha256": "9c84b68631151360fa88f4b3456402496e14540bae4138459dbf9b483439aa48"
+    },
+    {
+      "path": "docs/data/generated/aramaic.json",
+      "sha256": "d0bca1ac72596b6404d4872c62a01ddeee4ea5b1a5f2dbdddae152df8907fbb0"
     },
     {
       "path": "docs/data/generated/hebrew-frequency-report.json",
-      "sha256": "50d1104ea17488199d60be9395e6a75be52a6debcf23ea7763f28d83b2ee1a82"
+      "sha256": "3e9e840712d7c1ed6dc3cba945b071aa6e5b7b58eb56f9f0e65b6420ffd62efd"
     }
   ],
   "schemaVersion": 1,
   "scripts": [
     {
-      "bytes": 12013,
+      "bytes": 12514,
       "path": "tools/build_hebrew.py",
-      "sha256": "d7a82f5eea854987819c01b3b58f988f27c0784263e9bde973f70aabcb6a7588"
+      "sha256": "3bb3a50a60231b0e705994111a0d05eee9fe261659d2c942e275f102074e2532"
     },
     {
       "bytes": 2636,

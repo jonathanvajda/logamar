@@ -40,3 +40,8 @@ by downloading the pinned originals, verifying their hashes, and discarding unus
 fields in memory. The normal Hebrew build is local-only.
 
 User-facing attribution and transformation details are in `docs/data-sources.html`.
+
+Entries explicitly marked Aramaic (`A:` morphology) are now written to a separate
+`aramaic.json` collection, retaining the same Strong's IDs. Shared/proper names
+without that explicit classification remain in the Hebrew collection. This is a
+collection change, not a change to the source definitions or underlying counts.

@@ -1,0 +1,13 @@
+{
+  "policy": "Reviewed Strong's inflection/paradigm groups for dictionary-form study. These are not etymology groups: unrelated derived words remain separate. Original entries and per-ID counts are retained for hard mode. Greek dictionary verb headwords can conventionally be first-person singular; no uninflected stems are invented.",
+  "groups": {
+    "G1510": ["G1488", "G1498", "G1511", "G1526", "G2070", "G2071", "G2075", "G2076", "G2077", "G2252", "G2258", "G2277", "G2468", "G5600", "G5607"],
+    "G1473": ["G1691", "G1698", "G1700", "G2248", "G2249", "G2254", "G2257", "G3165", "G3427", "G3450"],
+    "G4771": ["G4571", "G4671", "G4675"],
+    "G5210": ["G5209", "G5213", "G5216"],
+    "G3778": ["G5023", "G5025", "G5026", "G5124", "G5125", "G5126", "G5127", "G5128", "G5129", "G5130"],
+    "G1438": ["G848"],
+    "G3588": ["G5120"]
+  },
+  "basis": "OpenScriptures Greek Word List entries, their src links, and the corresponding Strong's inflection families. Explicit reviewed mappings avoid assuming that src (which can encode etymology) always identifies a lemma. Plural you (G5210) remains its own dictionary headword; adverbs and derived possessive adjectives are not folded into their source pronouns."
+}

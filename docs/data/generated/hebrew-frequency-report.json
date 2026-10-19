@@ -185,6 +185,10 @@
     "wordRows": 305648
   },
   "excludedNonlexicalLexiconRows": 49,
+  "languageCounts": {
+    "aramaic": 655,
+    "hebrew": 8641
+  },
   "occurrences": 298656,
   "policy": "TAHOT primary word rows; Qere followed; L/Q/R/V and other main readings retained; X (reconstructed LXX additions) excluded; lexical roots only; bound affixes/punctuation (H9000+) excluded; identical root continuations after + counted once; dStrong senses aggregated to eStrong IDs, preserving eStrong suffixes; alternate-detail and interlinear rows not counted.",
   "termCount": 9296,

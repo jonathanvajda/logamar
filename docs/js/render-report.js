@@ -1,5 +1,6 @@
 import { summarizeProgress, learningStatus, matchesPool, POOLS } from "./progress.js";
 import { escapeHtml as esc } from "./html.js";
+import { LANGUAGES, LANGUAGE_LABELS } from "./models.js";
 
 const LABELS = { unseen: "Not started", learning: "Learning", revisit: "Revisit", strong: "Strong" };
 const COLORS = { unseen: "var(--line)", learning: "var(--primary-light)", revisit: "var(--danger)", strong: "var(--primary)" };
@@ -23,9 +24,9 @@ export function renderReport({ terms, progressRows, history = [], language = "bo
   return `
     <section class="report-heading">
       <div><span class="eyebrow">Learning record</span><h1>Your progress, made visible.</h1>
-      <p class="lead">${number(studied)} of ${number(total)} words studied. Choose what to work on next.</p></div>
+      <p class="lead">${number(studied)} of ${number(total)} dictionary words studied. Greek inflections and their history are grouped under the headword.</p></div>
       <label class="field"><span>Report language</span><select id="report-language">
-        ${[["both", "Greek and Hebrew"], ["greek", "Greek"], ["hebrew", "Hebrew / Aramaic"]].map(([value, label]) => `<option value="${value}" ${value === language ? "selected" : ""}>${label}</option>`).join("")}
+        ${[["both", "All biblical languages"], ...LANGUAGES.map((key) => [key, LANGUAGE_LABELS[key]])].map(([value, label]) => `<option value="${value}" ${value === language ? "selected" : ""}>${label}</option>`).join("")}
       </select></label>
     </section>
     <section class="stats-grid report-stats" aria-label="Progress totals">
@@ -55,8 +56,8 @@ export function renderReport({ terms, progressRows, history = [], language = "bo
       <div class="pool-grid">${[["revisit", "Revisit", status.revisit, "Return to words that need attention."], ["due", "Due now", due, "Review words on their schedule."], ["unseen", "Not started", status.unseen, "Introduce new vocabulary."], ["strong", "Strong", status.strong, "Check words you know well."]].map(([key, label, count, description]) => `<article class="pool-card"><h3>${label}</h3><strong class="pool-number">${number(count)}</strong><p class="muted">${description}</p>${count ? `<a class="button secondary" href="${link(key)}">Study ${label.toLowerCase()}</a>` : '<span class="muted">No cards in this pool</span>'}</article>`).join("")}</div>
     </section>
     <section class="panel report-section"><h2>Progress by language</h2>
-      ${["greek", "hebrew"].filter((key) => language === "both" || language === key).map((key) => languageRow(key, scoped, progressRows, history, now)).join("")}
-      <p class="muted">Frequency coverage is the share of source occurrences represented by studied entries, not a measure of reading comprehension. Greek and Hebrew use different source texts and counting rules.</p>
+      ${LANGUAGES.filter((key) => language === "both" || language === key).map((key) => languageRow(key, scoped, progressRows, history, now)).join("")}
+      <p class="muted">Frequency coverage is the share of source occurrences represented by studied entries, not a measure of reading comprehension. Greek uses TR counts; Hebrew and Aramaic use TAHOT counts.</p>
     </section>
     <section class="panel report-section milestone"><div><span class="eyebrow">Next milestone</span><h2>${total && status.strong === total ? "All words are strong" : `Build ${number(milestone)} strong words`}</h2><p class="muted">${number(Math.max(0, milestone - status.strong))} to go. Introduce common words and keep revisiting difficult ones.</p></div><strong>${number(status.strong)} / ${number(milestone)}</strong></section>
     <section class="panel report-section"><h2>Your words</h2>
@@ -88,7 +89,7 @@ function languageRow(language, terms, progressRows, history, now) {
   const summary = summarizeProgress(scoped, progressRows, history, now);
   const occurrences = scoped.reduce((sum, term) => sum + term.frequency, 0);
   const studiedOccurrences = scoped.reduce((sum, term) => sum + (summary.byId.get(term.id)?.seenCount > 0 ? term.frequency : 0), 0);
-  return `<div class="language-progress"><h3>${language === "greek" ? "Greek" : "Hebrew / Aramaic"}</h3><p>${number(summary.studied)} / ${number(summary.total)} studied; ${number(summary.status.strong)} strong; ${number(summary.status.revisit)} revisit</p><progress value="${summary.studied}" max="${Math.max(1, summary.total)}" aria-label="${language} words studied"></progress><p class="muted">${percent(summary.studied, summary.total)}% of entries studied; ${occurrences ? `${percent(studiedOccurrences, occurrences)}% frequency coverage` : "Frequency coverage unavailable"}</p></div>`;
+  return `<div class="language-progress"><h3>${LANGUAGE_LABELS[language]}</h3><p>${number(summary.studied)} / ${number(summary.total)} studied; ${number(summary.status.strong)} strong; ${number(summary.status.revisit)} revisit</p><progress value="${summary.studied}" max="${Math.max(1, summary.total)}" aria-label="${language} words studied"></progress><p class="muted">${percent(summary.studied, summary.total)}% of entries studied; ${occurrences ? `${percent(studiedOccurrences, occurrences)}% frequency coverage` : "Frequency coverage unavailable"}</p></div>`;
 }
 function wordRow(term, progress, selected) {
   const glosses = term.studyGlosses ?? term.glosses;

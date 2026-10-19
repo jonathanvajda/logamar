@@ -1,5 +1,6 @@
 {
   "counts": {
+    "dictionaryStudyTerms": 5495,
     "duplicateStrongNumbers": 4,
     "gntTermsWithFrequency": 0,
     "gntTokensCounted": 0,
@@ -8,6 +9,7 @@
     "greekTerms": 5538,
     "greekWordListEntriesWithInvalidStrong": 1,
     "greekWordListEntriesWithoutStrong": 10809,
+    "inflectedStudyEntries": 43,
     "lxxTermsWithFrequency": 0,
     "lxxTokensCounted": 0,
     "lxxTokensUnmapped": 0,
@@ -29267,23 +29269,23 @@
   "generator": "tools/build_greek.py",
   "outputs": [
     {
-      "bytes": 6033686,
+      "bytes": 6688432,
       "path": "docs/data/generated/greek.json",
-      "sha256": "dbd7cad2b3739e182e9d733ca3fc87627b48671079377b44bc1bebe9aff02245"
+      "sha256": "75dfa8dfa7fd713d1b90a4818e67e155b02510888553236614a92f22fbf8f163"
     },
     {
-      "bytes": 1668,
+      "bytes": 3143,
       "path": "docs/data/generated/greek-frequency-report.json",
-      "sha256": "9a60a43b0f5d1db21b67423c2c8766c1386f2432f5e4fadf36c96bdeff60e30a"
+      "sha256": "60f8a32cf08130802c1aeb0d0fe28ef9dfb26f9fa13c0d2954b358a825644a04"
     }
   ],
   "rebuildCommand": "python tools/build_greek.py",
   "schemaVersion": 1,
   "scripts": [
     {
-      "bytes": 3991,
+      "bytes": 5545,
       "path": "tools/build_greek.py",
-      "sha256": "95729732f4c059163d915dd7a831230b907dde899b79cb789cb27aa52da269ab"
+      "sha256": "3b79d4b930951c57d758c41af6f32838ebea41abf661f0f94fe9dd91805caca7"
     },
     {
       "bytes": 22629,
@@ -29296,9 +29298,9 @@
       "sha256": "009042151534e1324afbc09b6d95545c32ee2aa55b586200f87bfe5fe0a131a1"
     },
     {
-      "bytes": 3992,
+      "bytes": 4013,
       "path": "tools/merge_strongs_frequencies.py",
-      "sha256": "475e8b1ee2f939565ac890b062f984a8428a4f20a486e6bf6a0e14b7e17b3e19"
+      "sha256": "2d035e44e3374e4e13117869d3cca22a790923eb56886e1c2dbe2a222ff8d390"
     }
   ],
   "sources": [
@@ -29311,7 +29313,13 @@
       "bytes": 6710415,
       "path": "src/trparsed.json",
       "sha256": "80621615bef3c217b2b55376e939ad75e157d20669d949777d7b0ae13c75aa74"
+    },
+    {
+      "bytes": 1218,
+      "path": "src/greek-study-forms.json",
+      "sha256": "e27795fe424ddf5ed75154849dd2f5fa778b064331d64b2e13813294d3059468"
     }
   ],
+  "studyFormsPolicy": "Reviewed Strong's inflection/paradigm groups for dictionary-form study. These are not etymology groups: unrelated derived words remain separate. Original entries and per-ID counts are retained for hard mode. Greek dictionary verb headwords can conventionally be first-person singular; no uninflected stems are invented.",
   "verifyCommand": "python tools/build_greek.py --check"
 }

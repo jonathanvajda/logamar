@@ -1,4 +1,6 @@
 import { matchesPool, POOLS } from "./progress.js";
+import { LANGUAGES } from "./models.js";
+import { studyContext } from "./study-context.js";
 
 export function renderSetup({ terms, progressRows = [], defaults = {}, selectedIds = [] }) {
   const counts = countTermsByPos(terms);
@@ -13,9 +15,10 @@ export function renderSetup({ terms, progressRows = [], defaults = {}, selectedI
           <label class="field">
             <span>Language</span>
             <select name="language">
-              <option value="both" ${!defaults.language || defaults.language === "both" ? "selected" : ""}>Greek and Hebrew</option>
+              <option value="both" ${!defaults.language || defaults.language === "both" ? "selected" : ""}>All biblical languages</option>
               <option value="greek" ${defaults.language === "greek" ? "selected" : ""}>Greek</option>
-              <option value="hebrew" ${defaults.language === "hebrew" ? "selected" : ""}>Hebrew / Aramaic</option>
+              <option value="hebrew" ${defaults.language === "hebrew" ? "selected" : ""}>Hebrew</option>
+              <option value="aramaic" ${defaults.language === "aramaic" ? "selected" : ""}>Aramaic</option>
             </select>
           </label>
           <label class="field">
@@ -66,12 +69,12 @@ export function renderSetup({ terms, progressRows = [], defaults = {}, selectedI
             </select>
           </label>
           <label class="field">
-            <span>Difficulty</span>
+            <span>Greek word forms</span>
             <select name="difficulty">
-              <option value="normal">Normal</option>
-              <option value="easy">Easy</option>
-              <option value="hard">Hard</option>
+              <option value="normal">Dictionary forms (default)</option>
+              <option value="hard">Include inflected entries (hard)</option>
             </select>
+            <small>Dictionary mode groups reviewed Strong’s inflections under their headword. Hard mode keeps their separate forms and meanings. Hebrew and Aramaic are unchanged.</small>
           </label>
         </div>
         <div class="form-actions">
@@ -93,7 +96,7 @@ export function readSetupForm(form) {
   const language = data.get("language");
   return {
     mode: data.get("mode"),
-    languages: language === "both" ? ["greek", "hebrew"] : [language],
+    languages: language === "both" ? [...LANGUAGES] : [language],
     totalQuestions: Number(data.get("totalQuestions")),
     topN: Number(data.get("topN")),
     studyOrder: data.get("studyOrder") ?? "mixed",
@@ -106,7 +109,10 @@ export function readSetupForm(form) {
 export function updatePoolCounts(form, terms, progressRows, selectedIds = []) {
   const data = new FormData(form);
   const language = data.get("language");
-  const progress = new Map(progressRows.map((row) => [row.termId, row]));
+  const context = studyContext(terms, new Map(progressRows.map((row) => [row.termId, row])), data.get("difficulty"));
+  terms = context.terms;
+  const progress = context.progressMap;
+  selectedIds = selectedIds.map((id) => context.idMap.get(id) ?? id);
   for (const option of form.elements.progressPool.options) {
     const count = terms.filter((term) => (language === "both" || term.language === language) &&
       matchesPool(term, progress.get(term.id), option.value, new Date(), selectedIds)).length;

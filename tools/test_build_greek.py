@@ -9,6 +9,27 @@ from unittest.mock import patch
 import build_greek
 
 
+class StudyFormsTests(unittest.TestCase):
+    def test_reviewed_forms_keep_source_counts_and_combine_only_study_frequency(self):
+        terms = [{"id": "G1510", "lemma": "eimi", "frequency": 2, "partOfSpeech": "verb"},
+                 {"id": "G2076", "lemma": "esti", "frequency": 10, "partOfSpeech": "unknown"},
+                 {"id": "G3056", "lemma": "logos", "frequency": 7, "partOfSpeech": "noun"}]
+        self.assertEqual(build_greek.add_study_forms(terms, {"groups": {"G1510": ["G2076"]}}), 1)
+        self.assertEqual(terms[0]["lemmaFrequency"], 12)
+        self.assertEqual(terms[1]["frequency"], 10)
+        self.assertEqual(terms[1]["lemmaId"], "G1510")
+        self.assertEqual(terms[1]["dictionaryLemma"], "eimi")
+        self.assertEqual(terms[1]["partOfSpeech"], "verb")
+        self.assertFalse(terms[2]["isInflected"])
+
+    def test_invalid_or_ambiguous_mapping_fails(self):
+        terms = [{"id": "G1", "lemma": "one", "frequency": 1, "partOfSpeech": "noun"},
+                 {"id": "G2", "lemma": "two", "frequency": 1, "partOfSpeech": "noun"}]
+        for mapping in [{"G1": ["G3"]}, {"G1": ["G1"]}, {"G1": ["G2"], "G2": ["G1"]}]:
+            with self.subTest(mapping=mapping), self.assertRaises(ValueError):
+                build_greek.add_study_forms(terms, {"groups": mapping})
+
+
 class ReproducibilityCheckTests(unittest.TestCase):
     def test_check_detects_modified_or_missing_file_without_writing(self):
         for existing in [b"changed\n", None]:

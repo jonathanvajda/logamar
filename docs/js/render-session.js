@@ -24,10 +24,11 @@ export function renderSession({ session, items, terms, currentIndex, revealed, h
         <div class="term-meta">
           <span class="tag">${term.biblicalLanguages?.includes("aramaic") ? "Aramaic" : term.language}</span>
           <span class="tag">${term.partOfSpeech}</span>
-          <span class="tag">freq. ${term.frequency}</span>
+          ${term.isInflected ? '<span class="tag">Inflected form</span>' : ""}
+          <span class="tag">${item.dictionaryMode && term.language === "greek" ? "lemma freq." : "freq."} ${item.studyFrequency ?? term.frequency}</span>
           <span class="tag">${currentIndex + 1} / ${items.length}</span>
         </div>
-        <div class="lemma ${term.language === "hebrew" ? "hebrew" : ""}">${term.lemma}</div>
+        <div class="lemma ${["hebrew", "aramaic"].includes(term.language) ? "hebrew" : ""}">${term.lemma}</div>
         <p class="muted">${term.transliteration}</p>
         ${revealed ? renderGloss(term) : `<p class="muted">Reveal the gloss when you are ready.</p>`}
         ${hintVisible ? `<p class="hint">${hintFor(term)}</p>` : ""}
@@ -50,7 +51,7 @@ export function renderSession({ session, items, terms, currentIndex, revealed, h
 function renderGloss(term) {
   const short = term.studyGlosses ?? term.glosses;
   const more = short.join("; ") !== term.glosses.join("; ");
-  return `<p class="answer">${escapeHtml(short.join("; "))}</p>${more ? `
+  return `<p class="answer">${escapeHtml(short.join("; "))}</p>${term.isInflected ? `<p class="muted">Dictionary form: ${escapeHtml(term.dictionaryLemma)}</p>` : ""}${more ? `
     <details class="source-senses"><summary>More source senses</summary>
       <ul>${term.glosses.map((gloss) => `<li>${escapeHtml(gloss)}</li>`).join("")}</ul>
     </details>` : ""}`;

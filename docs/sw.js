@@ -5,7 +5,7 @@ const CACHE = PREFIX + self.LOGAMAR_PRECACHE.version;
 const assets = new Set(self.LOGAMAR_PRECACHE.assets.map((path) => new URL(path, self.registration.scope).href));
 
 self.addEventListener("install", (event) => {
-  // Installation succeeds only when the complete shell and both datasets exist.
+  // Installation succeeds only when the complete shell and all three vocabularies exist.
   event.waitUntil(caches.open(CACHE).then(async (cache) => {
     try {
       await cache.addAll([...assets].map((url) => new Request(url, { cache: "reload" })));

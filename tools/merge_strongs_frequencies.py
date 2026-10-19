@@ -15,7 +15,7 @@ def merge(terms, dataset, corpus):
         raise ValueError("Unsupported frequency schema")
     data = dataset["corpora"][corpus]
     prefix = "H" if corpus == "kjv_ot" else "G"
-    language = "hebrew" if prefix == "H" else "greek"
+    languages = {"hebrew", "aramaic"} if prefix == "H" else {"greek"}
     counts = data["counts"]
     for key, count in counts.items():
         if normalize_id(key) != key or not key.startswith(prefix) or type(count) is not int or count < 0:
@@ -28,7 +28,7 @@ def merge(terms, dataset, corpus):
     ids = Counter()
     for term in merged:
         key = term["id"]
-        if normalize_id(key) != key or not key.startswith(prefix) or term["language"] != language:
+        if normalize_id(key) != key or not key.startswith(prefix) or term["language"] not in languages:
             raise ValueError(f"Corpus {corpus} does not match term {key}")
         ids[key] += 1
         count = counts.get(key, 0)

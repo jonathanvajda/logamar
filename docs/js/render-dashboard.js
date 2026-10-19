@@ -10,7 +10,7 @@ export function renderDashboard({ terms, progressRows }) {
       <div class="hero-main">
         <span class="eyebrow">Offline first flashcards</span>
         <h1>Build fluency one word at a time.</h1>
-        <p class="lead">Study Koine Greek and Biblical Hebrew vocabulary with local progress tracking and clean, focused flashcards.</p>
+        <p class="lead">Study the biblical languages: Koine Greek, Biblical Hebrew, and Biblical Aramaic, with focused flashcards and progress saved on your device.</p>
         <div class="actions">
           <a class="button" href="#/setup">Start studying</a>
           <a class="button secondary" href="#/browser">Browse terms</a>

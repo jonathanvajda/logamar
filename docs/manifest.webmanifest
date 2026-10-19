@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Logamar — Greek and Hebrew Vocabulary",
+  "name": "Logamar — Biblical Languages",
   "short_name": "Logamar",
-  "description": "Study Greek and Hebrew vocabulary with flashcards, targeted practice, and progress saved on your device.",
+  "description": "Study Koine Greek, Biblical Hebrew, and Biblical Aramaic with flashcards, targeted practice, and progress saved on your device.",
   "lang": "en",
   "start_url": "./",
   "scope": "./",

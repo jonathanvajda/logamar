@@ -6,6 +6,7 @@ import { applyFlashcardResult } from "./scheduler.js";
 import { renderDashboard } from "./render-dashboard.js";
 import { readSetupForm, renderSetup, updatePoolCounts } from "./render-setup.js";
 import { enrichProgress } from "./progress.js";
+import { studyContext, dictionaryHistory } from "./study-context.js";
 import { renderSession } from "./render-session.js";
 import { renderReport } from "./render-report.js";
 import { filterTermSearch, renderTermBrowser, renderTermRows } from "./teacher-console.js";
@@ -18,6 +19,7 @@ let state = {
   terms: [],
   progressRows: [],
   history: [],
+  savingAnswer: false,
   selectedTermIds: new Set(),
   report: { language: "both", pool: "all", query: "", page: 0 },
   activeSession: null,
@@ -51,7 +53,8 @@ async function route() {
 
   if (path === "/" || path === "") {
     await refreshProgress();
-    render(renderDashboard({ terms: state.terms, progressRows: state.progressRows }));
+    const context = studyContext(state.terms, new Map(state.progressRows.map((row) => [row.termId, row])));
+    render(renderDashboard({ terms: context.terms, progressRows: [...context.progressMap.values()] }));
     return;
   }
 
@@ -160,6 +163,14 @@ function renderActiveSession() {
 }
 
 async function completeCard(choice) {
+  if (state.savingAnswer) return;
+  state.savingAnswer = true;
+  for (const button of document.querySelectorAll("#mark-know, #mark-revisit")) button.disabled = true;
+  try { await recordCard(choice); }
+  finally { state.savingAnswer = false; }
+}
+
+async function recordCard(choice) {
   const item = state.activeItems[state.currentIndex];
   const stored = await ensureProgress(item.termId);
   const progress = state.progressRows.find((row) => row.termId === item.termId) ?? stored;
@@ -207,7 +218,8 @@ function render(html) {
 }
 
 function showReport() {
-  render(renderReport({ terms: state.terms, progressRows: state.progressRows, history: state.history,
+  const context = studyContext(state.terms, new Map(state.progressRows.map((row) => [row.termId, row])));
+  render(renderReport({ terms: context.terms, progressRows: [...context.progressMap.values()], history: dictionaryHistory(state.history, context.idMap),
     ...state.report, selectedIds: [...state.selectedTermIds] }));
   document.querySelector("#report-language").addEventListener("change", (event) => {
     state.report.language = event.target.value; state.report.page = 0; showReport();

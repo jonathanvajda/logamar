@@ -1,7 +1,9 @@
 import { matchesPool, needsRevisit } from "./progress.js";
+import { LANGUAGES } from "./models.js";
+import { studyContext } from "./study-context.js";
 
 export function filterTerms(terms, options) {
-  const languages = options.languages?.length ? options.languages : ["greek", "hebrew"];
+  const languages = options.languages?.length ? options.languages : LANGUAGES;
   const partsOfSpeech = options.partsOfSpeech?.length ? options.partsOfSpeech : null;
   const topN = Number(options.topN ?? 999999);
 
@@ -23,8 +25,12 @@ export function classifyTerm(term, progress, now = new Date()) {
 }
 
 export function generateFlashcardItems(terms, progressMap, options, now = new Date()) {
+  const context = studyContext(terms, progressMap, options.difficulty);
+  terms = context.terms;
+  progressMap = context.progressMap;
+  const selectedIds = (options.selectedIds ?? []).map((id) => context.idMap.get(id) ?? id);
   const pool = options.progressPool ?? "all";
-  const eligible = terms.filter((term) => matchesPool(term, progressMap.get(term.id), pool, now, options.selectedIds));
+  const eligible = terms.filter((term) => matchesPool(term, progressMap.get(term.id), pool, now, selectedIds));
   const filtered = filterTerms(eligible, options);
   const total = Math.max(1, Number(options.totalQuestions ?? 10));
   const mostCommonFirst = options.studyOrder === "frequency";
@@ -32,7 +38,8 @@ export function generateFlashcardItems(terms, progressMap, options, now = new Da
     ? [...items].sort(compareFrequency).slice(0, Math.max(0, count))
     : takeShuffled(items, count);
   const toItems = (items) => items.map((term, index) => ({
-    id: `${term.id}-${index}`, termId: term.id, promptType: "lemma-to-gloss"
+    id: `${term.id}-${index}`, termId: term.id, promptType: "lemma-to-gloss",
+    studyFrequency: term.frequency, dictionaryMode: options.difficulty !== "hard"
   }));
   if (pool !== "all") return toItems(choose(filtered, total));
   const buckets = {
@@ -74,11 +81,7 @@ export function generateFlashcardItems(terms, progressMap, options, now = new Da
     selected.push(term);
   }
 
-  return choose(selected, total).map((term, index) => ({
-    id: `${term.id}-${index}`,
-    termId: term.id,
-    promptType: "lemma-to-gloss"
-  }));
+  return toItems(choose(selected, total));
 }
 
 function compareFrequency(a, b) {

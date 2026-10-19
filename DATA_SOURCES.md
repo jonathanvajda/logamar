@@ -12,6 +12,13 @@ generated vocabulary file. `docs/data/generated/data-manifest.json` records sour
 script, and output SHA-256 hashes plus counting diagnostics; GitHub Actions runs
 the reproducibility check. See `tools/README.md` for the complete workflow.
 
+The local `src/greek-study-forms.json` is also a build input. It contains reviewed
+inflection/paradigm mappings for default dictionary study; it does not collapse
+arbitrary derivations. Original per-ID frequencies remain intact, with combined
+`lemmaFrequency` used for dictionary ordering. Hard mode keeps the original separate
+entries. Conventional Greek dictionary forms can still be first-person singular;
+no artificial uninflected Greek stems are generated.
+
 ### Local Textus Receptus Parsed NT export
 
 - Source: `src/trparsed.json`; source metadata identifies Stephens 1550 with
@@ -132,9 +139,15 @@ vendor/
 ```text
 docs/data/generated/greek.json
 docs/data/generated/hebrew.json
+docs/data/generated/aramaic.json
 docs/data/generated/data-manifest.json
 docs/data/generated/hebrew-manifest.json
 ```
 
-The app loads both full generated vocabulary files. `hebrew-sample.json` is retained
+The app loads all three generated vocabulary files. `hebrew-sample.json` is retained
 only as a historical fixture; it is not loaded by the app.
+
+TBESH's explicit `A:` language classification determines the 655 entries placed in
+`aramaic.json`. Hebrew retains 8,641 entries, including shared/proper names without
+explicit Aramaic identification. Strong's IDs, frequency attribution, short-gloss
+restrictions, and stored user progress are unchanged by this collection split.

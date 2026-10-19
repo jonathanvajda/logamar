@@ -11,7 +11,7 @@ DOCS = ROOT / "docs"
 
 def build():
     paths = ["index.html", "data-sources.html", "manifest.webmanifest", "favicon.ico",
-             "data/generated/greek.json", "data/generated/hebrew.json",
+             "data/generated/greek.json", "data/generated/hebrew.json", "data/generated/aramaic.json",
              "data/generated/data-manifest.json", "data/generated/hebrew-manifest.json",
              "data/generated/greek-frequency-report.json", "data/generated/hebrew-frequency-report.json"]
     paths += [path.relative_to(DOCS).as_posix() for pattern in ["js/*.js", "css/*.css", "icons/*"] for path in DOCS.glob(pattern)]

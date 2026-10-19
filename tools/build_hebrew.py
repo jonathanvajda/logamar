@@ -194,7 +194,7 @@ def build():
         primary = entries[0]
         languages = sorted({"aramaic" if e["morph"].startswith("A:") else "hebrew" if e["morph"].startswith("H:") else "proper-name" for e in entries})
         terms.append({
-            "id": identity, "language": "hebrew", "biblicalLanguages": languages,
+            "id": identity, "language": "aramaic" if languages == ["aramaic"] else "hebrew", "biblicalLanguages": languages,
             "lemma": primary["lemma"], "transliteration": primary["transliteration"],
             "glosses": list(dict.fromkeys(e["gloss"] for e in entries)),
             "studyGlosses": [study_gloss(primary["gloss"])],
@@ -211,13 +211,17 @@ def build():
               "occurrences": sum(counts.values()), "excludedNonlexicalLexiconRows": excluded,
               "termsWithoutOccurrences": [t["id"] for t in terms if t["frequency"] == 0],
               "diagnostics": diagnostics}
-    outputs = {"hebrew.json": encode(terms), "hebrew-frequency-report.json": encode(report)}
+    report["languageCounts"] = dict(Counter(term["language"] for term in terms))
+    outputs = {"hebrew.json": encode([t for t in terms if t["language"] == "hebrew"]),
+               "aramaic.json": encode([t for t in terms if t["language"] == "aramaic"]),
+               "hebrew-frequency-report.json": encode(report)}
     manifest = {"generator": "tools/build_hebrew.py", "schemaVersion": 1,
                 "upstream": lock, "sources": inputs,
                 "scripts": [fingerprint(ROOT / name) for name in ["tools/build_hebrew.py", "tools/prepare_stepbible.py"]],
                 "sourceLock": fingerprint(SOURCE / "sources.lock.json"), "mappingOverrides": fingerprint(overrides_path),
                 "counts": {k: report[k] for k in ["termCount", "termsWithFrequency", "occurrences"]},
-                "changes": lock["changes"] + " " + POLICY + " Unicode whitespace normalized; gloss HTML entities decoded; senses merged by eStrong, alternate forms retained. Study gloss uses the first source entry's head before a colon; all original short glosses remain in glosses. No long definitions imported.",
+                "languageCounts": report["languageCounts"],
+                "changes": lock["changes"] + " " + POLICY + " Unicode whitespace normalized; gloss HTML entities decoded; senses merged by eStrong, alternate forms retained. Study gloss uses the first source entry's head before a colon; all original short glosses remain in glosses. Explicit TBESH A: entries are separated into aramaic.json with unchanged IDs. Shared/proper names without explicit Aramaic identification remain in the Hebrew collection. No long definitions imported.",
                 "outputs": [{"path": "docs/data/generated/" + name, "sha256": hashlib.sha256(data).hexdigest()} for name, data in outputs.items()]}
     outputs["hebrew-manifest.json"] = encode(manifest)
     return outputs, manifest

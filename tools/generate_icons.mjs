@@ -12,7 +12,7 @@ try {
   const page = await browser.newPage();
   for (const [name, size, maskable] of [["icon-192.png", 192], ["icon-512.png", 512], ["apple-touch-icon.png", 180], ["favicon-32.png", 32], ["maskable-512.png", 512, true]]) {
     // A maskable icon fills the canvas and keeps the Lambda within its safe zone.
-    const content = maskable ? svg.replace('rx="88"', 'rx="0"').replace('font-size="344"', 'font-size="280"').replace('y="364"', 'y="344"') : svg;
+    const content = maskable ? svg.replace('rx="88"', 'rx="0"').replace('<g id="mark"', '<g id="mark" transform="translate(256 256) scale(0.82) translate(-256 -256)"') : svg;
     await page.setViewportSize({ width: size, height: size });
     await page.setContent(`<style>html,body{margin:0;width:100%;height:100%;background:transparent}svg{display:block;width:100%;height:100%}</style>${content}`);
     await page.screenshot({ path: fileURLToPath(new URL(name, directory)), omitBackground: true });

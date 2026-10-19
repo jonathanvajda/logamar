@@ -1,4 +1,5 @@
-export const LANGUAGES = ["greek", "hebrew"];
+export const LANGUAGES = ["greek", "hebrew", "aramaic"];
+export const LANGUAGE_LABELS = { greek: "Greek", hebrew: "Hebrew", aramaic: "Aramaic" };
 
 export function createDefaultProgress(termId) {
   return {
@@ -37,6 +38,10 @@ export function normalizeTerm(rawTerm) {
     language: rawTerm.language,
     biblicalLanguages: rawTerm.biblicalLanguages ?? [rawTerm.language],
     lemma: rawTerm.lemma,
+    lemmaId: rawTerm.lemmaId ?? rawTerm.id,
+    isInflected: rawTerm.isInflected ?? false,
+    dictionaryLemma: rawTerm.dictionaryLemma ?? rawTerm.lemma,
+    lemmaFrequency: Number(rawTerm.lemmaFrequency ?? rawTerm.frequency ?? 0),
     transliteration: rawTerm.transliteration ?? "",
     glosses: Array.isArray(rawTerm.glosses) ? rawTerm.glosses : [],
     studyGlosses: Array.isArray(rawTerm.studyGlosses) ? rawTerm.studyGlosses : Array.isArray(rawTerm.glosses) ? rawTerm.glosses : [],

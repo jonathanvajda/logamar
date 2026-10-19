@@ -1,13 +1,16 @@
 # Logamar
 
-Logamar is a static, offline-first web app for studying New Testament Greek and Old Testament Hebrew vocabulary. The name combines `Log-` from Koine Greek `logos` (word) and `Amar` from Hebrew `amar` (to speak).
+Logamar is a static, offline-first web app for studying the biblical languages:
+Koine Greek, Biblical Hebrew, and Biblical Aramaic. The name combines `Log-` from
+Koine Greek `logos` (word) and `Amar` from Hebrew `amar` (to speak).
 
 Phase 1 lives in [`docs/`](./docs) for GitHub Pages deployment. It implements a complete flashcard vertical slice:
 
-- load generated Greek and Hebrew/Aramaic seed JSON
+- load generated Greek, Hebrew, and Aramaic seed JSON
 - choose language, term count, frequency band, and part of speech
 - generate a weighted flashcard session
 - choose mixed practice or most common first, introducing frequent vocabulary while retaining review cards
+- study Greek dictionary forms by default, or include separate inflected Strong's entries in hard mode
 - reveal glosses and show hints
 - mark cards as `I know this` or `Revisit`
 - persist progress in IndexedDB
@@ -41,7 +44,7 @@ On iPhone/iPad, the button explains Safari's **Share → Add to Home Screen** fl
 Installation support varies by browser. GitHub Pages supplies HTTPS; localhost
 also supports the service worker for development.
 
-After the first successful download, the app caches its interface and both full
+After the first successful download, the app caches its interface and all three
 vocabulary datasets for offline study. The desktop navigation shows “Ready for
 offline study” when preparation finishes. Your study progress remains in IndexedDB
 and can be backed up with Import / Export. Browser storage may be cleared by the
@@ -72,6 +75,22 @@ http://localhost:8080/tests/
 They also run without a browser using `node docs/tests/run.mjs`.
 
 ## Progress and targeted practice
+
+Greek defaults to dictionary-form study: 43 reviewed inflection/paradigm entries
+are grouped under their headword for selection, frequency ordering, and reporting.
+For example, “you are” and “he is” are studied under εἰμί (“to be”). Dictionary
+headwords use conventional lexical forms, not invented bare stems. The explicit
+mapping is in `src/greek-study-forms.json`; etymologically related words are not
+automatically merged. Choose **Greek word forms → Include inflected entries (hard)**
+to study the original separate entries and their meanings. Hard cards reveal the
+dictionary form after the answer. This is vocabulary practice, not a full parsing quiz.
+
+Aramaic is a separate study/report language with 655 entries explicitly marked
+Aramaic by TBESH. The remaining Hebrew file contains 8,641 entries. Shared/proper
+names without explicit Aramaic classification remain in the Hebrew collection.
+Old Strong's IDs and review records are retained. Dictionary-form progress combines
+Greek form reviews in memory, so historical inflection reviews still contribute
+without copying or resetting saved records.
 
 The Progress view shows studied/strong/revisit/due totals, lifetime review counts,
 a review-weighted Know rate, hints, and a streak based on local calendar days.
@@ -156,6 +175,7 @@ docs/
     generated/
       greek.json
       hebrew.json
+      aramaic.json
       hebrew-manifest.json
       data-manifest.json
   js/

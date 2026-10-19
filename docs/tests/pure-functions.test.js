@@ -7,6 +7,7 @@ import { normalizeTerm } from "../js/models.js";
 import { renderSession } from "../js/render-session.js";
 import { summarizeProgress, learningStatus, matchesPool, enrichProgress } from "../js/progress.js";
 import { renderReport } from "../js/render-report.js";
+import { studyContext, dictionaryHistory } from "../js/study-context.js";
 
 const results = document.querySelector("#results");
 const tests = [];
@@ -139,16 +140,17 @@ test("scoreAnswer applies hinted penalty", () => {
   assert(scoreAnswer({ wasCorrect: true, usedHint: true }) === 0.7, "Expected hinted score");
 });
 
-test("Aramaic metadata survives normalization and labels Hebrew-collection cards", () => {
+test("Aramaic cards use their own language and the right-to-left script layout", () => {
   const term = normalizeTerm({
-    id: "H2", language: "hebrew", biblicalLanguages: ["aramaic"],
+    id: "H2", language: "aramaic", biblicalLanguages: ["aramaic"],
     lemma: "אַב", glosses: ["father"], frequency: 3
   });
   const markup = renderSession({
     session: { mode: "flashcard" }, items: [{ termId: "H2" }], terms: [term],
     currentIndex: 0, revealed: true, hintVisible: false, usedHint: false
   });
-  assert(term.language === "hebrew", "Expected existing study collection to remain compatible");
+  assert(term.language === "aramaic", "Expected a separate Aramaic study collection");
+  assert(markup.includes('class="lemma hebrew"'), "Aramaic should retain Hebrew-script RTL styling");
   assert(markup.includes('class="tag">Aramaic</span>'), "Expected an explicit Aramaic label");
   assert(markup.includes("father"), "Expected short gloss on revealed card");
 });
@@ -267,6 +269,48 @@ test("Greek and legacy cards keep their existing glosses without redundant discl
   const term = normalizeTerm({ id: "G1", language: "greek", lemma: "alpha", glosses: ["first", "beginning"] });
   const markup = renderSession({ session: { mode: "flashcard" }, items: [{ termId: "G1" }], terms: [term], currentIndex: 0, revealed: true });
   assert(markup.includes("first; beginning") && !markup.includes("More source senses"), "Unchanged glosses should remain simple");
+});
+
+test("dictionary study combines Greek form counts without merging related words", () => {
+  const terms = [
+    { ...progressTerm("G1510", 2), lemmaFrequency: 12, lemmaId: "G1510" },
+    { ...progressTerm("G2076", 10), lemmaId: "G1510", isInflected: true },
+    { ...progressTerm("G3056", 7), lemmaId: "G3056" }
+  ];
+  const context = studyContext(terms, new Map());
+  assert(context.terms.length === 2 && context.terms[0].frequency === 12, "Expected one dictionary entry per mapped family");
+  assert(context.terms.some((term) => term.id === "G3056"), "Unmapped lexical words remain independent");
+  const items = generateFlashcardItems(terms, new Map(), { totalQuestions: 3, studyOrder: "frequency" });
+  assert(items.map((item) => item.termId).join(",") === "G1510,G3056", "Dictionary mode must be default and avoid duplicate headwords");
+  assert(items[0].studyFrequency === 12 && terms[0].frequency === 2, "Study totals must not overwrite source counts");
+  const hard = generateFlashcardItems(terms, new Map(), { difficulty: "hard", totalQuestions: 3, studyOrder: "frequency" });
+  assert(hard.map((item) => item.termId).join(",") === "G2076,G3056,G1510", "Hard mode should retain original forms and frequencies");
+});
+
+test("legacy inflection progress feeds dictionary revisit pools without duplicating stored reviews", () => {
+  const terms = [
+    { ...progressTerm("G1510", 2), lemmaFrequency: 12, lemmaId: "G1510" },
+    { ...progressTerm("G2076", 10), lemmaId: "G1510", isInflected: true }
+  ];
+  const root = learnedProgress("G1510", { lastSeenAt: "2026-10-18T12:00:00Z", lastChoice: "know" });
+  const form = learnedProgress("G2076", { seenCount: 1, correctCount: 0, incorrectCount: 1, lastSeenAt: "2026-10-19T12:00:00Z", lastChoice: "revisit" });
+  const progress = new Map([[root.termId, root], [form.termId, form]]);
+  const context = studyContext(terms, progress);
+  assert(context.progressMap.get("G1510").seenCount === 5, "Old reviews should contribute exactly once");
+  const items = generateFlashcardItems(terms, progress, { progressPool: "revisit", totalQuestions: 8 });
+  assert(items.length === 1 && items[0].termId === "G1510", "A revisit of an inflection must surface its headword");
+  assert(progress.get("G1510").seenCount === 4 && progress.get("G2076").seenCount === 1, "Stored per-ID records must stay intact");
+  const history = dictionaryHistory([{ termId: "G2076", answerGiven: "revisit" }], context.idMap);
+  assert(history[0].termId === "G1510", "Chart activity must follow the dictionary grouping");
+  const selected = generateFlashcardItems(terms, progress, { progressPool: "selected", selectedIds: ["G2076"], totalQuestions: 8 });
+  assert(selected.length === 1 && selected[0].termId === "G1510", "Selecting an old form should select the dictionary card");
+});
+
+test("Aramaic language filtering is independent of Hebrew", () => {
+  const terms = [progressTerm("H1", 1, "hebrew"), progressTerm("H2", 10, "aramaic")];
+  const items = generateFlashcardItems(terms, new Map(), { languages: ["aramaic"], totalQuestions: 8 });
+  assert(items.length === 1 && items[0].termId === "H2", "Aramaic sessions must not include Hebrew words");
+  assert(generateFlashcardItems(terms, new Map(), { totalQuestions: 8 }).length === 2, "All-languages sessions should include Aramaic");
 });
 
 for (const { name, fn } of tests) {

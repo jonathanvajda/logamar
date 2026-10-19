@@ -15,6 +15,7 @@ from merge_strongs_frequencies import merge
 ROOT = Path(__file__).resolve().parents[1]
 LEXICON = "openscriptures/GreekResources/GreekWordList.js"
 TR = "src/trparsed.json"
+STUDY_FORMS = "src/greek-study-forms.json"
 SCRIPTS = ["tools/build_greek.py", "tools/convert_openscriptures.py",
            "tools/count_strongs.py", "tools/merge_strongs_frequencies.py"]
 
@@ -27,6 +28,29 @@ def encode(value):
 def fingerprint(path):
     content = (ROOT / path).read_bytes()
     return {"path": path, "bytes": len(content), "sha256": hashlib.sha256(content).hexdigest()}
+
+
+def add_study_forms(terms, mapping):
+    by_id = {term["id"]: term for term in terms}
+    parents = {}
+    for parent, children in mapping["groups"].items():
+        if parent not in by_id:
+            raise ValueError(f"Unknown Greek headword: {parent}")
+        for child in children:
+            if child not in by_id or child in parents or child == parent or child in mapping["groups"]:
+                raise ValueError(f"Invalid or conflicting Greek form: {child}")
+            parents[child] = parent
+    for term in terms:
+        parent = parents.get(term["id"], term["id"])
+        term["lemmaId"] = parent
+        term["isInflected"] = parent != term["id"]
+        term["dictionaryLemma"] = by_id[parent]["lemma"]
+        if term["isInflected"] and term["partOfSpeech"] == "unknown":
+            term["partOfSpeech"] = by_id[parent]["partOfSpeech"]
+    for term in terms:
+        group = [term["id"], *mapping["groups"].get(term["id"], [])]
+        term["lemmaFrequency"] = sum(by_id[identity]["frequency"] for identity in group)
+    return len(parents)
 
 
 def build():
@@ -43,18 +67,23 @@ def build():
         raise ValueError("TR IDs lack lexical entries; review mappings before publishing")
     if len({term["id"] for term in terms}) != len(terms):
         raise ValueError("Canonical Greek data must have unique IDs")
-    report["sources"] = [fingerprint(LEXICON), fingerprint(TR)]
+    study_mapping = read_json(ROOT / STUDY_FORMS)
+    form_count = add_study_forms(terms, study_mapping)
+    report["studyForms"] = {"policy": study_mapping["policy"], "groups": study_mapping["groups"], "inflectedEntries": form_count}
+    report["sources"] = [fingerprint(LEXICON), fingerprint(TR), fingerprint(STUDY_FORMS)]
     outputs = {"greek.json": encode(terms), "greek-frequency-report.json": encode(report)}
     manifest = {
         "generator": "tools/build_greek.py",
         "schemaVersion": 1,
         "rebuildCommand": "python tools/build_greek.py",
         "verifyCommand": "python tools/build_greek.py --check",
-        "sources": [fingerprint(LEXICON), fingerprint(TR)],
+        "sources": [fingerprint(LEXICON), fingerprint(TR), fingerprint(STUDY_FORMS)],
+        "studyFormsPolicy": study_mapping["policy"],
         "scripts": [fingerprint(path) for path in SCRIPTS],
         "counts": {**lexical_counts, "trOccurrences": corpus["occurrences"],
                    "trTermsWithFrequency": corpus["uniqueStrongsIds"],
-                   "unmatchedTrOccurrences": report["unmatchedOccurrences"]},
+                   "unmatchedTrOccurrences": report["unmatchedOccurrences"], "inflectedStudyEntries": form_count,
+                   "dictionaryStudyTerms": len(terms) - form_count},
         "frequencyProvenance": corpus,
         "outputs": [{"path": f"docs/data/generated/{name}", "bytes": len(content),
                      "sha256": hashlib.sha256(content).hexdigest()} for name, content in outputs.items()],

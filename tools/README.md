@@ -71,6 +71,16 @@ The canonical output has 5,538 unique IDs (the former 5,542 rows included four
 duplicates), 5,466 IDs with TR counts, and 140,361 total occurrences. No Strong's
 IDs were removed. The app seed version was bumped to refresh existing installations.
 
+`src/greek-study-forms.json` supplies reviewed dictionary-study groups. The build
+adds `lemmaId`, `isInflected`, `dictionaryLemma`, and `lemmaFrequency`. The original
+lemma, glosses, IDs, and per-ID occurrence counts remain available for hard mode.
+Mapped inflections with unknown POS inherit the reviewed parent's POS. There are
+43 mapped entries, leaving 5,495 Greek dictionary cards. The mapping and its hash
+are recorded in the build manifest/report; unknown/conflicting targets fail the
+build. A generic `src` link is not enough to establish an inflection, since it may
+describe derivation instead. The browser groups mapped progress/history for default
+study and reports without rewriting the original stored records.
+
 ## Canonical Hebrew rebuild and attribution
 
 ```powershell
@@ -81,8 +91,8 @@ python -m unittest discover -s tools -p 'test_*.py'
 
 The local-only build reads `src/stepbible/tbesh.tsv` and the four `tahot-*.tsv`
 projections, verifying their hashes against `sources.lock.json`. It writes
-`hebrew.json`, `hebrew-frequency-report.json`, and `hebrew-manifest.json` under
-`docs/data/generated/`. `--check` compares all three files byte-for-byte without
+`hebrew.json`, `aramaic.json`, `hebrew-frequency-report.json`, and `hebrew-manifest.json` under
+`docs/data/generated/`. `--check` compares all four files byte-for-byte without
 writing. CI verifies both Greek and Hebrew.
 
 The result contains 9,296 lexical entries, including 655 explicitly Aramaic entries,
@@ -91,6 +101,12 @@ There are 187 zero-count entries, retained because they belong to the lexicon.
 These are TAHOT lexical-root annotation counts, not KJV tags or whole-word counts
 including affixes. Extended eStrong suffixes remain distinct. Original unsuffixed
 sample IDs remain available; the app now loads the full generated file.
+
+These entries are split into 8,641 Hebrew and 655 Aramaic records. Only entries
+whose TBESH morphology explicitly identifies Aramaic are moved; unidentified/shared
+proper names remain in the Hebrew collection. Both files retain their H IDs, so
+existing reviews and backups continue to refer to the same vocabulary. Both files
+are covered by the existing Hebrew/Aramaic manifest and audit report.
 
 TAHOT's main reading, including Qere and restored readings, is used. Reconstructed
 LXX additions (152 rows), nonlexical roots (6,079), alternate-detail fields, and
