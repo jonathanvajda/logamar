@@ -5,6 +5,8 @@ import { applyFlashcardResult } from "../js/scheduler.js";
 import { scoreAnswer } from "../js/scoring.js";
 import { normalizeTerm } from "../js/models.js";
 import { renderSession } from "../js/render-session.js";
+import { summarizeProgress, learningStatus, matchesPool, enrichProgress } from "../js/progress.js";
+import { renderReport } from "../js/render-report.js";
 
 const results = document.querySelector("#results");
 const tests = [];
@@ -149,6 +151,122 @@ test("Aramaic metadata survives normalization and labels Hebrew-collection cards
   assert(term.language === "hebrew", "Expected existing study collection to remain compatible");
   assert(markup.includes('class="tag">Aramaic</span>'), "Expected an explicit Aramaic label");
   assert(markup.includes("father"), "Expected short gloss on revealed card");
+});
+
+const progressTerm = (id, frequency = 1, language = "greek") => ({
+  id, frequency, language, lemma: id, transliteration: "", glosses: ["word"], partOfSpeech: "noun"
+});
+const learnedProgress = (id, values = {}) => ({
+  termId: id, seenCount: 4, correctCount: 4, incorrectCount: 0, hintCount: 0,
+  confidence: "strong", nextDueAt: "2099-01-01", ...values
+});
+
+test("latest revisit overrides a strong lifetime score and is shared by study pools", () => {
+  const progress = learnedProgress("G1", { lastChoice: "revisit", incorrectCount: 1, seenCount: 5 });
+  assert(learningStatus(progress) === "revisit", "Latest revisit must be visible despite high lifetime score");
+  assert(matchesPool(progressTerm("G1"), progress, "revisit"), "Revisit study pool must use same definition");
+  assert(!matchesPool(progressTerm("G1"), progress, "strong"), "Revisit must take precedence over strong");
+  const next = applyFlashcardResult(progress, { choice: "know", usedHint: false });
+  assert(next.lastChoice === "know", "Latest choice should be persisted");
+});
+
+test("old progress recovers the latest choice without overwriting explicit new data", () => {
+  const rows = [learnedProgress("G1"), learnedProgress("G2", { lastChoice: "know" })];
+  const history = [
+    { termId: "G1", answerGiven: "revisit", answeredAt: "2026-10-19T13:00:00Z" },
+    { termId: "G1", answerGiven: "know", answeredAt: "2026-10-18T13:00:00Z" },
+    { termId: "G2", answerGiven: "revisit", answeredAt: "2026-10-19T13:00:00Z" }
+  ];
+  const enriched = enrichProgress(rows, history);
+  assert(enriched[0].lastChoice === "revisit", "Must use latest timestamp, not array order");
+  assert(enriched[1].lastChoice === "know", "Explicit stored choice remains authoritative");
+  assert(rows[0].lastChoice === undefined, "Original progress is not mutated");
+});
+
+test("summary uses weighted ratings and ignores progress for absent vocabulary", () => {
+  const terms = [progressTerm("G1"), progressTerm("G2"), progressTerm("G3"), progressTerm("G4")];
+  const rows = [learnedProgress("G1"), learnedProgress("G2", { confidence: "learning", seenCount: 1, correctCount: 0, incorrectCount: 1, lastChoice: "revisit", hintCount: 1 }),
+    learnedProgress("G3", { confidence: "learning", seenCount: 1, correctCount: 1 }), learnedProgress("orphan", { seenCount: 100 })];
+  const summary = summarizeProgress(terms, rows);
+  assert(summary.reviews === 6 && summary.knowRate === 83, "Know rate should be 5/6, weighted by reviews");
+  assert(summary.studied === 3 && summary.hints === 1, "Only existing vocabulary should be counted");
+  assert(Object.values(summary.status).reduce((a, b) => a + b, 0) === 4, "Breakdown must partition the vocabulary");
+  assert(summary.status.strong === 1 && summary.status.revisit === 1 && summary.status.unseen === 1 && summary.status.learning === 1, "Expected all four learning states");
+});
+
+test("due pool respects review dates and excludes new and retired cards", () => {
+  const now = new Date("2026-10-19T12:00:00Z");
+  const term = progressTerm("G1");
+  assert(matchesPool(term, learnedProgress("G1", { nextDueAt: now.toISOString() }), "due", now), "Due at exact boundary");
+  assert(!matchesPool(term, learnedProgress("G1", { retired: true, nextDueAt: "2020-01-01" }), "due", now), "Retired card not due");
+  assert(!matchesPool(term, { seenCount: 0, nextDueAt: "2020-01-01" }, "due", now), "Unseen card not due");
+});
+
+test("explicit revisit pools never fill with unrelated cards and apply top N within the pool", () => {
+  const terms = [progressTerm("G1", 100), progressTerm("G2", 20), progressTerm("G3", 10)];
+  const progress = new Map([["G1", learnedProgress("G1")], ["G2", learnedProgress("G2", { lastChoice: "revisit" })], ["G3", learnedProgress("G3", { lastChoice: "revisit" })]]);
+  const items = generateFlashcardItems(terms, progress, {
+    progressPool: "revisit", topN: 1, totalQuestions: 10, studyOrder: "frequency"
+  });
+  assert(items.length === 1 && items[0].termId === "G2", "Only top eligible revisit word should be returned");
+  const empty = generateFlashcardItems(terms, new Map(), { progressPool: "revisit", totalQuestions: 8 });
+  assert(empty.length === 0, "Empty revisit pool must stay empty");
+});
+
+test("selected-card sessions preserve selection and language restrictions", () => {
+  const terms = [progressTerm("G1"), progressTerm("G2"), progressTerm("H1", 10, "hebrew")];
+  const items = generateFlashcardItems(terms, new Map(), {
+    progressPool: "selected", selectedIds: ["G2", "H1"], languages: ["greek"], totalQuestions: 10
+  });
+  assert(items.length === 1 && items[0].termId === "G2", "Session must contain only selected eligible cards");
+});
+
+test("activity uses local days and a streak may continue from yesterday", () => {
+  const now = new Date(2026, 9, 19, 12);
+  const at = (day) => new Date(2026, 9, day, 23).toISOString();
+  const history = [
+    { termId: "G1", answerGiven: "know", answeredAt: at(18) },
+    { termId: "G1", answerGiven: "revisit", answeredAt: at(17) },
+    { termId: "missing", answerGiven: "know", answeredAt: at(19) },
+    { termId: "G1", answerGiven: "know", answeredAt: "not-a-date" }
+  ];
+  const summary = summarizeProgress([progressTerm("G1")], [], history, now);
+  assert(summary.activity.length === 14 && summary.streak === 2, "Expected local 14-day window and two-day streak");
+  assert(summary.activity[12].know === 1 && summary.activity[11].revisit === 1, "Reviews belong to their local calendar dates");
+  assert(summary.activity[13].know === 0, "No invented activity today");
+});
+
+test("report is paginated, escapes imported text, and handles a fresh browser", () => {
+  const terms = Array.from({ length: 120 }, (_, index) => progressTerm(`G${index + 1}`, 120 - index));
+  terms[0].lemma = '<img src=x onerror="alert(1)">';
+  const markup = renderReport({ terms, progressRows: [], query: "", page: 0 });
+  assert((markup.match(/class="report-select"/g) ?? []).length === 50, "Only one page should render");
+  assert(markup.includes("Page 1 of 3"), "Expected three pages");
+  assert(!markup.includes('<img src=x') && markup.includes("&lt;img"), "Imported lemma should render as text");
+  assert(!markup.includes("NaN") && !markup.includes("Infinity"), "Fresh report should have valid numeric displays");
+  const empty = renderReport({ terms: [], progressRows: [] });
+  assert(empty.includes("No words match") && !empty.includes("NaN"), "Empty vocabulary should render gracefully");
+});
+
+test("Hebrew cards show a short study gloss and keep full senses behind a closed disclosure", () => {
+  const term = normalizeTerm({
+    id: "H3947", language: "hebrew", lemma: "לָקַח", studyGlosses: ["to take"],
+    glosses: ["to take: take", "to take: marry", "to take: bring"], frequency: 1
+  });
+  const options = { session: { mode: "flashcard" }, items: [{ termId: term.id }], terms: [term], currentIndex: 0 };
+  const revealed = renderSession({ ...options, revealed: true });
+  assert(revealed.includes('<p class="answer">to take</p>'), "Expected concise head gloss as the answer");
+  assert(revealed.includes('<details class="source-senses">') && !revealed.includes('<details open'), "Extra senses should start collapsed");
+  assert(revealed.includes("to take: marry"), "Original senses must remain available");
+  const hidden = renderSession({ ...options, revealed: false });
+  assert(!hidden.includes("to take") && !hidden.includes("More source senses"), "Neither answer nor extra senses should leak before reveal");
+  assert(term.glosses.length === 3, "Normalization must preserve all source glosses");
+});
+
+test("Greek and legacy cards keep their existing glosses without redundant disclosure", () => {
+  const term = normalizeTerm({ id: "G1", language: "greek", lemma: "alpha", glosses: ["first", "beginning"] });
+  const markup = renderSession({ session: { mode: "flashcard" }, items: [{ termId: "G1" }], terms: [term], currentIndex: 0, revealed: true });
+  assert(markup.includes("first; beginning") && !markup.includes("More source senses"), "Unchanged glosses should remain simple");
 });
 
 for (const { name, fn } of tests) {

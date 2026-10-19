@@ -1,7 +1,7 @@
 """Tests for STEPBible field selection, lexical mappings, and word counts."""
 import unittest
 
-from build_hebrew import count_rows, lexical_rows, normalize, pos
+from build_hebrew import count_rows, lexical_rows, normalize, pos, study_gloss
 from prepare_stepbible import projection
 
 
@@ -20,6 +20,12 @@ class ProjectionTests(unittest.TestCase):
 
 
 class LexiconTests(unittest.TestCase):
+    def test_study_gloss_uses_source_head_without_repeated_sense_labels(self):
+        self.assertEqual(study_gloss("to take: marry"), "to take")
+        self.assertEqual(study_gloss("face: before"), "face")
+        self.assertEqual(study_gloss("to say"), "to say")
+        self.assertEqual(study_gloss("father of"), "father of")
+
     def test_extended_ids_and_aliases_are_preserved(self):
         rows = ["H5892a\tH5892A =\tH5892A\tעיר\tir\tH:N-M\texcitement",
                 "H5892b\tH5892B =\tH5892B\tעיר\tir\tH:N-F\tcity",

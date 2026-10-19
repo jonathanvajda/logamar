@@ -13,6 +13,8 @@ Phase 1 lives in [`docs/`](./docs) for GitHub Pages deployment. It implements a 
 - persist progress in IndexedDB
 - browse terms
 - view a progress report
+- track learning status, daily practice, streaks, and frequency coverage by language
+- study only revisit, due, new, learning, strong, previously studied, or manually selected cards
 - export/import progress JSON
 
 Test sessions, printable tests, answer keys, and full teacher templates are planned for Phase 2.
@@ -37,6 +39,33 @@ Pure-function tests are available at:
 ```text
 http://localhost:8080/tests/
 ```
+
+They also run without a browser using `node docs/tests/run.mjs`.
+
+## Progress and targeted practice
+
+The Progress view shows studied/strong/revisit/due totals, lifetime review counts,
+a review-weighted Know rate, hints, and a streak based on local calendar days.
+A vocabulary breakdown and 14-day activity chart work offline without chart libraries.
+Language filters scope the report and its session shortcuts. Frequency coverage
+measures the share of source occurrences represented by studied entries; it is not
+a reading-comprehension score, and Greek/Hebrew source totals are not directly comparable.
+
+Revisit includes a latest Revisit rating, weak performance, or a manual flag.
+The latest choice is saved on progress records; older records recover it from
+answer history when available. Strong uses the existing scheduler rule: at least
+four Know ratings with no Revisit ratings. Due is a separate, overlapping pool
+based on the scheduled time. Self-assessed Know rate is not test accuracy.
+
+Choose a progress pool in study setup, or use a report shortcut. An explicit pool
+never fills missing slots with unrelated cards. Most common first orders eligible
+cards within that pool. Top-N frequency limits are applied after the progress filter.
+The report's searchable list shows 50 words per page; selections persist across
+pages and filters while the app is open, and Study selected opens a selected-only
+session. Temporary selections reset when the page reloads. Saved progress and
+answer history remain local and are included in the existing export/import backup.
+The activity chart uses actual saved answer history; aggregate-only imports do not
+invent historical activity.
 
 ## Deploy to GitHub Pages
 

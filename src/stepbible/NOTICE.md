@@ -21,6 +21,9 @@ The source license applies to the adapted data independently of the app's licens
   source markers remain intact. Original source bytes are not redistributed here.
 - The downstream build groups senses by extended Strong's ID, preserves alternate
   forms and glosses, and mechanically normalizes whitespace/HTML entities.
+- `studyGlosses` uses the first entry's head before a colon for concise cards.
+  The original short glosses remain intact in `glosses` and available in an
+  expandable source-senses disclosure. The first entry is not a sense-frequency ranking.
 - Root counts exclude H9000+ bound affixes/punctuation and reconstructed LXX
   additions. Qere/main readings are used; matching multiword continuations count once.
 - Missing dStrong tags can fall back to a numeric base only when there is exactly

@@ -1,5 +1,5 @@
 {
-  "changes": "TBESH: retain columns eStrong through Gloss; omit Meaning entirely. TAHOT: retain only primary word-row reference, dStrongs, and grammar; omit text, translations, interlinear duplicates and variant-detail columns. TAHOT primary word rows; Qere followed; L/Q/R/V and other main readings retained; X (reconstructed LXX additions) excluded; lexical roots only; bound affixes/punctuation (H9000+) excluded; identical root continuations after + counted once; dStrong senses aggregated to eStrong IDs, preserving eStrong suffixes; alternate-detail and interlinear rows not counted. Unicode whitespace normalized; gloss HTML entities decoded; senses merged by eStrong, alternate forms retained. No long definitions imported.",
+  "changes": "TBESH: retain columns eStrong through Gloss; omit Meaning entirely. TAHOT: retain only primary word-row reference, dStrongs, and grammar; omit text, translations, interlinear duplicates and variant-detail columns. TAHOT primary word rows; Qere followed; L/Q/R/V and other main readings retained; X (reconstructed LXX additions) excluded; lexical roots only; bound affixes/punctuation (H9000+) excluded; identical root continuations after + counted once; dStrong senses aggregated to eStrong IDs, preserving eStrong suffixes; alternate-detail and interlinear rows not counted. Unicode whitespace normalized; gloss HTML entities decoded; senses merged by eStrong, alternate forms retained. Study gloss uses the first source entry's head before a colon; all original short glosses remain in glosses. No long definitions imported.",
   "counts": {
     "occurrences": 298656,
     "termCount": 9296,
@@ -14,7 +14,7 @@
   "outputs": [
     {
       "path": "docs/data/generated/hebrew.json",
-      "sha256": "d4b92521b2685f3aae23657ad5f3d2c544636895b642a396099d885acd637dd2"
+      "sha256": "44fa25dc175f3bc112061e33459e476213fe9459ad792dab8237d47694ee492d"
     },
     {
       "path": "docs/data/generated/hebrew-frequency-report.json",
@@ -24,9 +24,9 @@
   "schemaVersion": 1,
   "scripts": [
     {
-      "bytes": 11687,
+      "bytes": 12013,
       "path": "tools/build_hebrew.py",
-      "sha256": "a2f70d13a31a3d90958c430960882bb71c8c006816bc48181bd18029aa8d68d4"
+      "sha256": "d7a82f5eea854987819c01b3b58f988f27c0784263e9bde973f70aabcb6a7588"
     },
     {
       "bytes": 2636,

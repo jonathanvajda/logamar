@@ -36,6 +36,11 @@ def plain(value):
     return " ".join(html.unescape(value).split())
 
 
+def study_gloss(value):
+    """Use the source's head gloss; keep full senses separately in glosses."""
+    return value.split(":", 1)[0].strip() or value
+
+
 def pos(morph):
     if morph.startswith("N:"):
         return "proper-noun"
@@ -192,6 +197,7 @@ def build():
             "id": identity, "language": "hebrew", "biblicalLanguages": languages,
             "lemma": primary["lemma"], "transliteration": primary["transliteration"],
             "glosses": list(dict.fromkeys(e["gloss"] for e in entries)),
+            "studyGlosses": [study_gloss(primary["gloss"])],
             "partOfSpeech": pos(primary["morph"]), "frequency": counts[identity],
             "frequencies": {"tahot": counts[identity]}, "sourceRefs": examples[identity],
             "exampleRefs": examples[identity], "morphologyHints": list(dict.fromkeys(e["morph"] for e in entries)),
@@ -211,7 +217,7 @@ def build():
                 "scripts": [fingerprint(ROOT / name) for name in ["tools/build_hebrew.py", "tools/prepare_stepbible.py"]],
                 "sourceLock": fingerprint(SOURCE / "sources.lock.json"), "mappingOverrides": fingerprint(overrides_path),
                 "counts": {k: report[k] for k in ["termCount", "termsWithFrequency", "occurrences"]},
-                "changes": lock["changes"] + " " + POLICY + " Unicode whitespace normalized; gloss HTML entities decoded; senses merged by eStrong, alternate forms retained. No long definitions imported.",
+                "changes": lock["changes"] + " " + POLICY + " Unicode whitespace normalized; gloss HTML entities decoded; senses merged by eStrong, alternate forms retained. Study gloss uses the first source entry's head before a colon; all original short glosses remain in glosses. No long definitions imported.",
                 "outputs": [{"path": "docs/data/generated/" + name, "sha256": hashlib.sha256(data).hexdigest()} for name, data in outputs.items()]}
     outputs["hebrew-manifest.json"] = encode(manifest)
     return outputs, manifest

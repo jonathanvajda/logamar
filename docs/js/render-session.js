@@ -1,3 +1,5 @@
+import { escapeHtml } from "./html.js";
+
 export function renderSession({ session, items, terms, currentIndex, revealed, hintVisible, usedHint }) {
   const termById = new Map(terms.map((term) => [term.id, term]));
   const item = items[currentIndex];
@@ -27,7 +29,7 @@ export function renderSession({ session, items, terms, currentIndex, revealed, h
         </div>
         <div class="lemma ${term.language === "hebrew" ? "hebrew" : ""}">${term.lemma}</div>
         <p class="muted">${term.transliteration}</p>
-        ${revealed ? `<p class="answer">${term.glosses.join("; ")}</p>` : `<p class="muted">Reveal the gloss when you are ready.</p>`}
+        ${revealed ? renderGloss(term) : `<p class="muted">Reveal the gloss when you are ready.</p>`}
         ${hintVisible ? `<p class="hint">${hintFor(term)}</p>` : ""}
         <div class="card-actions">
           <button id="reveal-card" class="secondary" ${revealed ? "disabled" : ""}>Reveal</button>
@@ -43,6 +45,15 @@ export function renderSession({ session, items, terms, currentIndex, revealed, h
       </aside>
     </section>
   `;
+}
+
+function renderGloss(term) {
+  const short = term.studyGlosses ?? term.glosses;
+  const more = short.join("; ") !== term.glosses.join("; ");
+  return `<p class="answer">${escapeHtml(short.join("; "))}</p>${more ? `
+    <details class="source-senses"><summary>More source senses</summary>
+      <ul>${term.glosses.map((gloss) => `<li>${escapeHtml(gloss)}</li>`).join("")}</ul>
+    </details>` : ""}`;
 }
 
 function hintFor(term) {

@@ -1,20 +1,29 @@
-export function renderSetup({ terms }) {
+import { matchesPool, POOLS } from "./progress.js";
+
+export function renderSetup({ terms, progressRows = [], defaults = {}, selectedIds = [] }) {
   const counts = countTermsByPos(terms);
   const posOptions = [...counts.keys()].sort((a, b) => a.localeCompare(b));
   return `
     <section class="panel">
       <span class="eyebrow">Study setup</span>
       <h1>Choose your flashcards.</h1>
-      <p class="lead">Phase 1 focuses on lightweight flashcard review. Tests will build on this same setup in Phase 2.</p>
+      <p class="lead">Choose a progress pool, then set the size and order of your session.</p>
       <form id="setup-form" class="setup-form">
         <div class="option-grid">
           <label class="field">
             <span>Language</span>
             <select name="language">
-              <option value="both">Greek and Hebrew</option>
-              <option value="greek">Greek</option>
-              <option value="hebrew">Hebrew</option>
+              <option value="both" ${!defaults.language || defaults.language === "both" ? "selected" : ""}>Greek and Hebrew</option>
+              <option value="greek" ${defaults.language === "greek" ? "selected" : ""}>Greek</option>
+              <option value="hebrew" ${defaults.language === "hebrew" ? "selected" : ""}>Hebrew / Aramaic</option>
             </select>
+          </label>
+          <label class="field">
+            <span>Progress pool</span>
+            <select name="progressPool">
+              ${Object.entries(POOLS).map(([pool, label]) => `<option value="${pool}" ${pool === (defaults.pool ?? "all") ? "selected" : ""}>${label}</option>`).join("")}
+            </select>
+            <small id="pool-count" role="status"></small>
           </label>
           <label class="field">
             <span>Number of terms</span>
@@ -70,6 +79,7 @@ export function renderSetup({ terms }) {
           <a class="button secondary" href="#/">Cancel</a>
         </div>
       </form>
+      <p class="muted">Revisit includes your latest “Revisit” choices, weak words, and flagged cards. Due now includes studied cards whose scheduled review time has arrived. Strong means at least four “Know” ratings with no “Revisit” ratings. Progress pools can overlap.</p>
     </section>
   `;
 }
@@ -87,9 +97,29 @@ export function readSetupForm(form) {
     totalQuestions: Number(data.get("totalQuestions")),
     topN: Number(data.get("topN")),
     studyOrder: data.get("studyOrder") ?? "mixed",
+    progressPool: data.get("progressPool") ?? "all",
     partsOfSpeech: data.getAll("partOfSpeech"),
     difficulty: data.get("difficulty")
   };
+}
+
+export function updatePoolCounts(form, terms, progressRows, selectedIds = []) {
+  const data = new FormData(form);
+  const language = data.get("language");
+  const progress = new Map(progressRows.map((row) => [row.termId, row]));
+  for (const option of form.elements.progressPool.options) {
+    const count = terms.filter((term) => (language === "both" || term.language === language) &&
+      matchesPool(term, progress.get(term.id), option.value, new Date(), selectedIds)).length;
+    option.textContent = `${POOLS[option.value]} (${count.toLocaleString()})`;
+  }
+  const options = readSetupForm(form);
+  const eligible = terms.filter((term) => (language === "both" || term.language === language) &&
+    (!options.partsOfSpeech.length || options.partsOfSpeech.includes(term.partOfSpeech)) &&
+    matchesPool(term, progress.get(term.id), options.progressPool, new Date(), selectedIds));
+  const count = Math.min(eligible.length, options.topN);
+  const requested = Math.min(options.totalQuestions, count);
+  form.querySelector("#pool-count").textContent = `${count.toLocaleString()} matching cards · ${requested} in this session`;
+  form.querySelector('[type="submit"]').disabled = count === 0;
 }
 
 function countTermsByPos(terms) {

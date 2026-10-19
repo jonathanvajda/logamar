@@ -1,11 +1,9 @@
-import { progressSuccessRate } from "./models.js";
+import { summarizeProgress, learningStatus } from "./progress.js";
+import { escapeHtml } from "./html.js";
 
 export function renderDashboard({ terms, progressRows }) {
   const progressByTerm = new Map(progressRows.map((row) => [row.termId, row]));
-  const seen = progressRows.filter((row) => row.seenCount > 0).length;
-  const revisit = progressRows.filter((row) => row.confidence === "weak").length;
-  const hints = progressRows.reduce((sum, row) => sum + row.hintCount, 0);
-  const avgSuccess = average(progressRows.map(progressSuccessRate).filter((rate) => rate !== null));
+  const summary = summarizeProgress(terms, progressRows);
 
   return `
     <section class="hero">
@@ -28,14 +26,14 @@ export function renderDashboard({ terms, progressRows }) {
     </section>
     <section class="stats-grid" aria-label="Progress summary">
       ${stat("Terms", terms.length)}
-      ${stat("Seen", seen)}
-      ${stat("Revisit", revisit)}
-      ${stat("Avg. success", avgSuccess === null ? "N/A" : `${avgSuccess}%`)}
+      ${stat("Studied", summary.studied)}
+      ${stat("Revisit", summary.status.revisit)}
+      ${stat("Know rate", summary.knowRate === null ? "—" : `${summary.knowRate}%`)}
     </section>
     <section class="panel">
-      <h2>Phase 1 scope</h2>
-      <p class="muted">This MVP supports flashcard sessions with reveal, hints, “know it,” and “revisit.” Test modes, printable exports, and teacher templates are staged for the next phase.</p>
-      <p class="muted">Hints used: ${hints}</p>
+      <h2>Choose your next step</h2>
+      <p class="muted">${summary.due} cards due now · ${summary.status.strong} strong words · ${summary.reviews} card reviews</p>
+      <div class="actions"><a class="button" href="#/report">Explore your progress</a><a class="button secondary" href="#/setup?pool=revisit">Study revisit pool</a><a class="button secondary" href="#/setup?pool=due">Study due cards</a></div>
     </section>
   `;
 }
@@ -44,15 +42,10 @@ function stat(label, value) {
   return `<div class="stat"><strong>${value}</strong><span>${label}</span></div>`;
 }
 
-function average(values) {
-  if (values.length === 0) return null;
-  return Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
-}
-
 function recentRows(progressRows, progressByTerm, terms) {
   const byId = new Map(terms.map((term) => [term.id, term]));
   const rows = progressRows
-    .filter((row) => row.lastSeenAt)
+    .filter((row) => row.lastSeenAt && byId.has(row.termId))
     .sort((a, b) => new Date(b.lastSeenAt) - new Date(a.lastSeenAt))
     .slice(0, 4);
 
@@ -62,6 +55,6 @@ function recentRows(progressRows, progressByTerm, terms) {
 
   return rows.map((row) => {
     const term = byId.get(row.termId);
-    return `<div><strong>${term?.lemma ?? row.termId}</strong><br><span class="muted">${progressByTerm.get(row.termId)?.confidence ?? "new"}</span></div>`;
+    return `<div><strong>${escapeHtml(term?.lemma ?? row.termId)}</strong><br><span class="muted">${learningStatus(progressByTerm.get(row.termId))}</span></div>`;
   }).join("");
 }

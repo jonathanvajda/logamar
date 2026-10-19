@@ -39,6 +39,7 @@ export function normalizeTerm(rawTerm) {
     lemma: rawTerm.lemma,
     transliteration: rawTerm.transliteration ?? "",
     glosses: Array.isArray(rawTerm.glosses) ? rawTerm.glosses : [],
+    studyGlosses: Array.isArray(rawTerm.studyGlosses) ? rawTerm.studyGlosses : Array.isArray(rawTerm.glosses) ? rawTerm.glosses : [],
     partOfSpeech: rawTerm.partOfSpeech ?? "unknown",
     frequency: Number(rawTerm.frequency ?? 0),
     frequencies: rawTerm.frequencies ?? {

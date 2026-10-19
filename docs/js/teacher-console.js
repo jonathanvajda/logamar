@@ -24,7 +24,7 @@ export function renderTermRows(terms) {
       <strong>${term.id}</strong>
       <span>${term.lemma} <span class="muted">${term.transliteration}</span></span>
       <span>${term.partOfSpeech}</span>
-      <span>${term.glosses.join("; ")}</span>
+      <span>${(term.studyGlosses ?? term.glosses).join("; ")}</span>
     </div>
   `).join("");
 }

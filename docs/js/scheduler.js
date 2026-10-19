@@ -13,6 +13,7 @@ export function confidenceFromProgress(progress) {
 export function applyFlashcardResult(progress, { choice, usedHint, now = new Date() }) {
   const next = {
     ...progress,
+    lastChoice: choice,
     seenCount: progress.seenCount + 1,
     lastSeenAt: now.toISOString(),
     nextDueAt: scheduleFromFlashcardChoice(choice, now)

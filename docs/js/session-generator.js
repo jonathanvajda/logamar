@@ -1,3 +1,5 @@
+import { matchesPool, needsRevisit } from "./progress.js";
+
 export function filterTerms(terms, options) {
   const languages = options.languages?.length ? options.languages : ["greek", "hebrew"];
   const partsOfSpeech = options.partsOfSpeech?.length ? options.partsOfSpeech : null;
@@ -11,22 +13,28 @@ export function filterTerms(terms, options) {
 }
 
 export function classifyTerm(term, progress, now = new Date()) {
-  if (!progress || progress.seenCount === 0) return "unseen";
-  if (progress.manuallyFlagged) return "flagged";
-  if ((progress.confidence === "weak" || progress.incorrectCount > progress.correctCount) && !progress.retired) {
+  if (progress?.manuallyFlagged && !progress.retired) return "flagged";
+  if (needsRevisit(progress)) {
     return "weak";
   }
+  if (!progress || progress.seenCount === 0) return "unseen";
   if (progress.nextDueAt && new Date(progress.nextDueAt) <= now) return "due";
   return "review";
 }
 
 export function generateFlashcardItems(terms, progressMap, options, now = new Date()) {
-  const filtered = filterTerms(terms, options);
+  const pool = options.progressPool ?? "all";
+  const eligible = terms.filter((term) => matchesPool(term, progressMap.get(term.id), pool, now, options.selectedIds));
+  const filtered = filterTerms(eligible, options);
   const total = Math.max(1, Number(options.totalQuestions ?? 10));
   const mostCommonFirst = options.studyOrder === "frequency";
   const choose = (items, count) => mostCommonFirst
     ? [...items].sort(compareFrequency).slice(0, Math.max(0, count))
     : takeShuffled(items, count);
+  const toItems = (items) => items.map((term, index) => ({
+    id: `${term.id}-${index}`, termId: term.id, promptType: "lemma-to-gloss"
+  }));
+  if (pool !== "all") return toItems(choose(filtered, total));
   const buckets = {
     unseen: [],
     due: [],

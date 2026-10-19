@@ -81,6 +81,12 @@ are excluded entirely** because the upstream header identifies separate Online
 Bible permission requirements. Short glosses are credited to Tyndale scholars.
 The source projections do not redistribute the complete original datasets.
 
+For study display, `studyGlosses` contains the first source entry's head gloss,
+before any colon (for example, `to take` from `to take: marry`). All original short
+glosses remain in `glosses`, so search and source inspection retain the senses.
+Flashcards offer them in a closed “More source senses” disclosure after reveal.
+This is a mechanical display simplification, not a new definition or sense ranking.
+
 To recreate the source projections from the pinned upstream revision:
 
 ```powershell
