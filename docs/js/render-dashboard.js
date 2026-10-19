@@ -18,7 +18,7 @@ export function renderDashboard({ terms, progressRows }) {
       </div>
       <aside class="panel">
         <h2>Today</h2>
-        <p class="muted">Your data stays in this browser through IndexedDB.</p>
+        <p class="muted">Your study progress is saved on this device.</p>
         <div class="progress-list">
           ${recentRows(progressRows, progressByTerm, terms)}
         </div>
@@ -39,7 +39,7 @@ export function renderDashboard({ terms, progressRows }) {
 }
 
 function stat(label, value) {
-  return `<div class="stat"><strong>${value}</strong><span>${label}</span></div>`;
+  return `<div class="stat"><strong>${typeof value === "number" ? value.toLocaleString() : value}</strong><span>${label}</span></div>`;
 }
 
 function recentRows(progressRows, progressByTerm, terms) {

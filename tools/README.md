@@ -2,6 +2,43 @@
 
 These tools convert manually downloaded OpenScriptures source files into Logamar's canonical JSON format. They do not fetch from the network and they do not generate lexical content.
 
+## App icons and offline installation
+
+`python tools/build_pwa.py` generates `docs/precache-manifest.js` from the actual
+app HTML, CSS, ES modules, canonical Greek/Hebrew data, source credits/reports,
+manifest, and icons. Any asset or service-worker change produces a new cache
+version. Run this **after** rebuilding vocabulary or changing app assets.
+`python tools/build_pwa.py --check` is a read-only CI check for stale cache contents.
+LF rules in `.gitattributes` keep the content hashes stable across checkouts.
+
+The service worker installs the complete cache, supports project subdirectory
+scopes, and waits for the user's Update app action before activating an update.
+Activation removes only old caches belonging to its own scope; IndexedDB progress
+and unrelated application caches are preserved. The full vocabulary download is
+required before offline readiness is reported. Local tests do not install an OS app.
+
+Icons preserve the existing Lambda mark using `docs/icons/logo.svg`. PNGs include
+192/512 install icons, a separate safe-zone maskable icon, a 180px Apple touch icon,
+and a 32px favicon wrapped in ICO. To regenerate them with Playwright installed:
+
+```powershell
+node tools/generate_icons.mjs
+python tools/build_pwa.py
+```
+
+Optional browser checks (also require Playwright and its Chromium browser):
+
+```powershell
+node tools/test_pwa.mjs
+```
+
+Both Node tools accept `PLAYWRIGHT_MODULE` pointing to an existing Playwright module
+directory. The browser test serves only `docs/` under `/logamar/` on a temporary
+local port and uses a fresh browser context. It checks Chromium installability,
+offline vocabulary seeding and study, deferred updates, preservation of saved
+progress and unrelated caches, and mobile overflow. It closes its server/browser
+afterward. Basic icon/manifest validation is part of the Python test suite.
+
 ## Canonical Greek rebuild and verification
 
 The authoritative app dataset, `docs/data/generated/greek.json`, is built from

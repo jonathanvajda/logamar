@@ -5,3 +5,11 @@ src/trparsed.json text eol=lf
 src/stepbible/*.tsv text eol=lf
 src/stepbible/*.json text eol=lf
 docs/data/generated/*.json text eol=lf
+docs/*.html text eol=lf
+docs/*.js text eol=lf
+docs/*.webmanifest text eol=lf
+docs/js/*.js text eol=lf
+docs/css/*.css text eol=lf
+docs/icons/*.svg text eol=lf
+docs/icons/*.png binary
+docs/favicon.ico binary

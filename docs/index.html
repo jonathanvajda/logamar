@@ -4,6 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Logamar</title>
+    <meta name="theme-color" content="#173b65">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Logamar">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="icon" href="./icons/logo.svg" type="image/svg+xml">
+    <link rel="icon" href="./favicon.ico" sizes="32x32">
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
     <link rel="stylesheet" href="./css/styles.css">
   </head>
   <body>
@@ -22,6 +30,8 @@
         <a href="#/report">Progress</a>
         <a href="#/settings">Import / Export</a>
       </nav>
+      <button id="install-app" class="install-button" hidden>Install Logamar</button>
+      <small id="offline-status" class="offline-status" role="status">Preparing offline study…</small>
     </header>
 
     <main id="app" class="app-shell" tabindex="-1">
@@ -31,6 +41,10 @@
     </main>
 
     <footer class="app-shell">
+      <section id="pwa-update" class="pwa-update" role="status" hidden>
+        <p>An update is ready. Finish your cards, then update Logamar.</p>
+        <button id="update-app">Update app</button>
+      </section>
       <p class="muted">Hebrew vocabulary and counts adapted from <a href="https://www.STEPBible.org">STEP Bible</a>, based on work at Tyndale House Cambridge, under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="./data-sources.html">Data sources, attribution, and changes</a>.</p>
     </footer>
 
@@ -41,6 +55,14 @@
       </section>
     </template>
 
+    <dialog id="install-help" class="install-dialog" aria-labelledby="install-help-title">
+      <h2 id="install-help-title">Install Logamar</h2>
+      <p id="ios-install-steps" hidden>In Safari, open the Share menu and choose <strong>Add to Home Screen</strong>, then <strong>Add</strong>.</p>
+      <p id="browser-install-steps">Choose your browser’s install option in its address bar or main menu. Installation is available in supporting browsers; you can also keep using Logamar in a browser tab.</p>
+      <button id="close-install-help">Close</button>
+    </dialog>
+
     <script type="module" src="./js/app.js"></script>
+    <script type="module" src="./js/pwa.js"></script>
   </body>
 </html>

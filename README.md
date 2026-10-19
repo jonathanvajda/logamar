@@ -34,6 +34,35 @@ Then open:
 http://localhost:8080/
 ```
 
+## Install and study offline
+
+Use **Install Logamar** in the navigation, or your browser's install option.
+On iPhone/iPad, the button explains Safari's **Share → Add to Home Screen** flow.
+Installation support varies by browser. GitHub Pages supplies HTTPS; localhost
+also supports the service worker for development.
+
+After the first successful download, the app caches its interface and both full
+vocabulary datasets for offline study. The desktop navigation shows “Ready for
+offline study” when preparation finishes. Your study progress remains in IndexedDB
+and can be backed up with Import / Export. Browser storage may be cleared by the
+user or browser, so installation does not replace a progress backup.
+
+Updates show an **Update app** button. Finish the current cards before choosing it;
+the app reloads only when you request the update. Cache cleanup is scoped to this
+Logamar installation and does not remove saved study progress.
+
+Before deploying any changed app assets, regenerate the content-based offline list:
+
+```powershell
+python tools/build_pwa.py
+python tools/build_pwa.py --check
+```
+
+The manifest and service worker use relative URLs to support GitHub Pages project
+paths. CI checks that the offline asset list matches the shipped files. See
+[tool documentation](tools/README.md) for optional browser installation tests and
+icon generation.
+
 Pure-function tests are available at:
 
 ```text

@@ -2,7 +2,7 @@ import { summarizeProgress, learningStatus, matchesPool, POOLS } from "./progres
 import { escapeHtml as esc } from "./html.js";
 
 const LABELS = { unseen: "Not started", learning: "Learning", revisit: "Revisit", strong: "Strong" };
-const COLORS = { unseen: "#dce4ee", learning: "#1f7a8c", revisit: "#c44949", strong: "#287a4b" };
+const COLORS = { unseen: "var(--line)", learning: "var(--primary-light)", revisit: "var(--danger)", strong: "var(--primary)" };
 const number = (value) => value.toLocaleString();
 const percent = (value, total) => total && value > 0 && value / total < 0.01 ? "&lt;1" : total ? Math.round(value / total * 100) : 0;
 
