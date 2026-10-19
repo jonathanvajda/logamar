@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Data sources and attribution — Logamar</title>
+    <link rel="stylesheet" href="./css/styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <article class="panel">
+        <a href="./index.html">Return to Logamar</a>
+        <h1>Data sources and attribution</h1>
+        <h2>Hebrew and Aramaic vocabulary</h2>
+        <p>Adapted from <a href="https://www.STEPBible.org">STEP Bible</a> data, based on work at Tyndale House Cambridge, licensed under <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>. The data retains this license; Logamar’s software license does not replace it.</p>
+        <p>Sources: <strong>TBESH — Translators Brief lexicon of Extended Strongs for Hebrew</strong> and <strong>TAHOT — Translators Amalgamated Hebrew Old Testament</strong>. The source documentation credits the Westminster Leningrad text via OpenScriptures and ETCBC morphology among TAHOT’s underlying resources.</p>
+        <p><a href="https://github.com/STEPBible/STEPBible-Data/tree/ed476a8ee6e3f7b3a46fc48af6c7dabc02387b1d">Source revision ed476a8ee6e3f7b3a46fc48af6c7dabc02387b1d</a>. Consult upstream for the complete, current datasets. Logamar is an independent project; these adaptations are not endorsed by STEP Bible.</p>
+        <h3>What Logamar changes</h3>
+        <ul>
+          <li>Uses TBESH’s Hebrew forms, transliterations, grammatical categories, and short glosses. Long “Meaning” definitions are excluded entirely because TBESH identifies separate Online Bible permission requirements for them.</li>
+          <li>Groups disambiguated senses by their extended Strong’s dictionary entry, preserving extended suffix IDs, alternate forms, and distinct glosses. Whitespace is normalized and HTML entities in glosses are decoded.</li>
+          <li>Counts lexical root annotations in TAHOT’s main word rows. Qere readings are followed; alternate readings, reconstructed LXX additions, interlinear duplicates, bound affixes, and punctuation are excluded. Matching multiword continuations count once.</li>
+          <li>Records missing disambiguated-tag mappings and their resolution. Numeric-base fallbacks require a single possible dictionary entry; two ambiguous cases have explicit, documented mappings. Unresolved continuation markers are reported without inventing source corrections.</li>
+          <li>Includes Aramaic vocabulary in the Hebrew study collection, marking Aramaic cards separately.</li>
+        </ul>
+        <p>These frequencies describe this selected TAHOT reading and counting policy. They can differ from KJV tag totals or counts from another Hebrew edition.</p>
+        <p>For exact provenance, hashes, changes, and diagnostics, see the <a href="./data/generated/hebrew-manifest.json">Hebrew manifest</a> and <a href="./data/generated/hebrew-frequency-report.json">frequency audit report</a>.</p>
+        <h2>Greek vocabulary and frequencies</h2>
+        <p>Greek lexical entries are adapted from the <a href="https://github.com/openscriptures/GreekResources">OpenScriptures Greek Word List</a>. Frequency counts come from the local Textus Receptus Parsed NT export, whose metadata identifies Stephens 1550 with Scrivener variants and states public-domain status. Parsing codes, alternate variant segments, and end-of-book subscriptions are excluded; the first lexical analysis is counted for each word or annotated phrase.</p>
+        <p>See the <a href="./data/generated/data-manifest.json">Greek manifest</a> for source hashes and the exact counting policy.</p>
+      </article>
+    </main>
+  </body>
+</html>

@@ -23,6 +23,10 @@ export function classifyTerm(term, progress, now = new Date()) {
 export function generateFlashcardItems(terms, progressMap, options, now = new Date()) {
   const filtered = filterTerms(terms, options);
   const total = Math.max(1, Number(options.totalQuestions ?? 10));
+  const mostCommonFirst = options.studyOrder === "frequency";
+  const choose = (items, count) => mostCommonFirst
+    ? [...items].sort(compareFrequency).slice(0, Math.max(0, count))
+    : takeShuffled(items, count);
   const buckets = {
     unseen: [],
     due: [],
@@ -46,7 +50,7 @@ export function generateFlashcardItems(terms, progressMap, options, now = new Da
   const selected = [];
   const seen = new Set();
   for (const [bucketName, count] of targets) {
-    for (const term of takeShuffled(buckets[bucketName], count)) {
+    for (const term of choose(buckets[bucketName], Math.min(count, total - selected.length))) {
       if (!seen.has(term.id)) {
         selected.push(term);
         seen.add(term.id);
@@ -58,15 +62,19 @@ export function generateFlashcardItems(terms, progressMap, options, now = new Da
     .flat()
     .filter((term) => !seen.has(term.id));
 
-  for (const term of takeShuffled(leftovers, total - selected.length)) {
+  for (const term of choose(leftovers, total - selected.length)) {
     selected.push(term);
   }
 
-  return takeShuffled(selected, total).map((term, index) => ({
+  return choose(selected, total).map((term, index) => ({
     id: `${term.id}-${index}`,
     termId: term.id,
     promptType: "lemma-to-gloss"
   }));
+}
+
+function compareFrequency(a, b) {
+  return b.frequency - a.frequency || a.id.localeCompare(b.id, "en", { numeric: true });
 }
 
 export function takeShuffled(items, count, random = Math.random) {

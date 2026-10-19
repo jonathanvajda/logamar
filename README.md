@@ -4,9 +4,10 @@ Logamar is a static, offline-first web app for studying New Testament Greek and 
 
 Phase 1 lives in [`docs/`](./docs) for GitHub Pages deployment. It implements a complete flashcard vertical slice:
 
-- load generated Greek and sample Hebrew seed JSON
+- load generated Greek and Hebrew/Aramaic seed JSON
 - choose language, term count, frequency band, and part of speech
 - generate a weighted flashcard session
+- choose mixed practice or most common first, introducing frequent vocabulary while retaining review cards
 - reveal glosses and show hints
 - mark cards as `I know this` or `Revisit`
 - persist progress in IndexedDB
@@ -70,7 +71,22 @@ For the GPL version of Logamar, prefer public-domain, CC0, or clearly GPL-compat
    - License: CC BY-SA 4.0.
    - Fit: high quality Greek/Hebrew lexicon and tagged text resources. ShareAlike obligations may be acceptable for GPL-adjacent open distribution, but verify compatibility for the exact packaging plan before bundling.
 
-The Greek app data is generated from OpenScriptures' Greek Word List. The Hebrew file remains a tiny handmade sample until the Hebrew pipeline is promoted.
+Greek vocabulary is generated from OpenScriptures' Greek Word List with local TR
+frequencies. Hebrew/Aramaic vocabulary and frequencies are adapted from
+[STEP Bible](https://www.STEPBible.org), based on work at Tyndale House Cambridge,
+under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Only TBESH's short
+glosses are used; its separately restricted long definitions are excluded.
+See [data attribution and changes](docs/data-sources.html) and
+[build instructions](tools/README.md).
+
+Rebuild and verify the app's data with:
+
+```powershell
+python tools/build_greek.py
+python tools/build_hebrew.py
+python tools/build_greek.py --check
+python tools/build_hebrew.py --check
+```
 
 ## Project structure
 
@@ -81,8 +97,9 @@ docs/
   data/
     generated/
       greek.json
+      hebrew.json
+      hebrew-manifest.json
       data-manifest.json
-    hebrew-sample.json
   js/
     app.js
     db.js

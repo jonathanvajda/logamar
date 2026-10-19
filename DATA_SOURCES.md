@@ -2,7 +2,54 @@
 
 Logamar's canonical lexical JSON must be generated deterministically from vetted source files. Do not use AI-generated lexical entries.
 
-The first import target is Greek data from OpenScriptures' Greek Word List. Hebrew Strong's and morphhb frequency data are supported as follow-on inputs.
+## Reproducing the current Greek app data
+
+Run `python tools/build_greek.py` from any working directory, then
+`python tools/build_greek.py --check` to verify the result without changing files
+(use the script's absolute path when outside the repository).
+The build uses the local Greek Word List and `src/trparsed.json`, not an existing
+generated vocabulary file. `docs/data/generated/data-manifest.json` records source,
+script, and output SHA-256 hashes plus counting diagnostics; GitHub Actions runs
+the reproducibility check. See `tools/README.md` for the complete workflow.
+
+### Local Textus Receptus Parsed NT export
+
+- Source: `src/trparsed.json`; source metadata identifies Stephens 1550 with
+  Scrivener 1894 variants and states that the text is public domain.
+- Current Greek frequency source: first lexical annotation per word/phrase,
+  excluding parsing IDs above G5624, alternate `VAR2` segments, and subscriptions.
+- Counts describe this specific export. Multiple lexical analyses use the first
+  assignment and are listed in the manifest. The empty Luke 17:36 is reported.
+- `frequency`, `frequencies.tr_nt`, and `frequencies.gnt` contain these TR counts.
+  The canonical build does not use MorphGNT or KJV tag counts.
+
+The app uses Greek data from OpenScriptures' Greek Word List with TR frequencies,
+and Hebrew/Aramaic short glosses and counts from STEPBible TBESH/TAHOT.
+OpenScriptures Strong's and morphhb are alternate conversion inputs.
+
+## Current Hebrew/Aramaic dataset: STEPBible TBESH and TAHOT
+
+- Creator credit: [STEP Bible](https://www.STEPBible.org), based on work at Tyndale House Cambridge.
+- Repository: https://github.com/STEPBible/STEPBible-Data
+- Pinned revision: `ed476a8ee6e3f7b3a46fc48af6c7dabc02387b1d`.
+- License: [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/).
+  This applies to the adapted data independently of the software license.
+- TBESH provides forms, transliterations, grammar, and short glosses. Its long
+  Meaning definitions, credited to Online Bible and subject to separate permission,
+  are entirely excluded from both source projections and app data.
+- Four TAHOT sections provide root annotations from all 39 OT books. Main/Qere
+  readings are counted; X additions, nonlexical affixes, alternate-detail columns,
+  and repeated interlinear displays are excluded. Matching multiword continuations
+  count once. Counts are stored in `frequency` and `frequencies.tahot`.
+- Disambiguated tags map to extended Strong's lexical IDs with suffixes preserved.
+  Missing mappings must resolve unambiguously or have a documented override;
+  otherwise the build fails. All mapping fallbacks and source anomalies are audited.
+- Source projections, source hashes, and modification notices: `src/stepbible/`.
+  Full original datasets are not mirrored; use upstream for original data.
+- Rebuild: `python tools/build_hebrew.py`; verify: `python tools/build_hebrew.py --check`.
+- App attribution: `docs/data-sources.html` and the visible footer. Exact changes,
+  script/source/output hashes, and mapping audit are in `hebrew-manifest.json` and
+  `hebrew-frequency-report.json` in `docs/data/generated/`.
 
 ### OpenScriptures Greek Word List
 
@@ -83,9 +130,11 @@ vendor/
 ## Generated App Files
 
 ```text
-docs/data/greek.json
-docs/data/hebrew.json
-docs/data/data-manifest.json
+docs/data/generated/greek.json
+docs/data/generated/hebrew.json
+docs/data/generated/data-manifest.json
+docs/data/generated/hebrew-manifest.json
 ```
 
-The app currently loads `docs/data/generated/greek.json` for Greek and `docs/data/hebrew-sample.json` for Hebrew. The Hebrew sample remains a tiny handmade placeholder until full generated Hebrew files are intentionally added.
+The app loads both full generated vocabulary files. `hebrew-sample.json` is retained
+only as a historical fixture; it is not loaded by the app.

@@ -2,7 +2,7 @@ export function renderTermBrowser({ terms }) {
   return `
     <section class="panel">
       <span class="eyebrow">Term browser</span>
-      <h1>Search the sample lexicon.</h1>
+      <h1>Search the lexicon.</h1>
       <label class="field">
         <span>Search</span>
         <input id="term-search" type="search" placeholder="Strong's number, lemma, transliteration, gloss, language, POS">

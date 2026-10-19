@@ -1,8 +1,8 @@
 import { clearStore, getAll, getOne, putMany, putOne } from "./db.js";
 import { normalizeTerm } from "./models.js";
 
-const SEED_VERSION = "2026-05-05-generated-greek-v1";
-const SEED_FILES = ["./data/generated/greek.json", "./data/hebrew-sample.json"];
+const SEED_VERSION = "2026-10-19-generated-greek-hebrew-v3";
+const SEED_FILES = ["./data/generated/greek.json", "./data/generated/hebrew.json"];
 
 export async function loadSeedData() {
   const seedSetting = await getOne("settings", "seedDataVersion");

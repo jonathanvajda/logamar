@@ -35,6 +35,7 @@ export function normalizeTerm(rawTerm) {
   return {
     id: rawTerm.id,
     language: rawTerm.language,
+    biblicalLanguages: rawTerm.biblicalLanguages ?? [rawTerm.language],
     lemma: rawTerm.lemma,
     transliteration: rawTerm.transliteration ?? "",
     glosses: Array.isArray(rawTerm.glosses) ? rawTerm.glosses : [],

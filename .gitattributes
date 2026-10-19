@@ -1,0 +1,7 @@
+# Keep source/script hashes and generated JSON stable across checkouts.
+tools/*.py text eol=lf
+openscriptures/GreekResources/GreekWordList.js text eol=lf
+src/trparsed.json text eol=lf
+src/stepbible/*.tsv text eol=lf
+src/stepbible/*.json text eol=lf
+docs/data/generated/*.json text eol=lf

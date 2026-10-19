@@ -23,11 +23,19 @@ export function renderSetup({ terms }) {
           <label class="field">
             <span>Frequency band</span>
             <select name="topN">
-              <option value="999999">All sample terms</option>
+              <option value="999999">All terms</option>
               <option value="100">Top 100 by frequency</option>
               <option value="500">Top 500 by frequency</option>
               <option value="1000">Top 1000 by frequency</option>
             </select>
+          </label>
+          <label class="field">
+            <span>Study order</span>
+            <select name="studyOrder">
+              <option value="mixed">Mixed practice</option>
+              <option value="frequency">Most common first</option>
+            </select>
+            <small>Most common first introduces frequent words first while keeping review cards in your session.</small>
           </label>
         </div>
         <fieldset class="checkbox-group">
@@ -78,6 +86,7 @@ export function readSetupForm(form) {
     languages: language === "both" ? ["greek", "hebrew"] : [language],
     totalQuestions: Number(data.get("totalQuestions")),
     topN: Number(data.get("topN")),
+    studyOrder: data.get("studyOrder") ?? "mixed",
     partsOfSpeech: data.getAll("partOfSpeech"),
     difficulty: data.get("difficulty")
   };

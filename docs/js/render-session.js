@@ -20,7 +20,7 @@ export function renderSession({ session, items, terms, currentIndex, revealed, h
     <section class="session-layout">
       <article class="flashcard">
         <div class="term-meta">
-          <span class="tag">${term.language}</span>
+          <span class="tag">${term.biblicalLanguages?.includes("aramaic") ? "Aramaic" : term.language}</span>
           <span class="tag">${term.partOfSpeech}</span>
           <span class="tag">freq. ${term.frequency}</span>
           <span class="tag">${currentIndex + 1} / ${items.length}</span>

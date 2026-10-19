@@ -1,0 +1,10 @@
+{
+  "H5892I": {
+    "target": "H5892b",
+    "reason": "TAHOT Isa.60.14#14 labels the root as city, matching TBESH H5892b (city), rather than H5892a (excitement). The dStrong H5892I is absent from this TBESH revision."
+  },
+  "H7417I": {
+    "target": "H7417c",
+    "reason": "TAHOT Jos.15.32#04, Jos.19.7#02 and 1Ch.4.32#04 identify Rimmon as a place (Npl); TBESH H7417c is the place entry, versus the deity H7417a or person H7417b. The dStrong H7417I is absent from this TBESH revision."
+  }
+}

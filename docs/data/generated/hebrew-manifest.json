@@ -1,0 +1,114 @@
+{
+  "changes": "TBESH: retain columns eStrong through Gloss; omit Meaning entirely. TAHOT: retain only primary word-row reference, dStrongs, and grammar; omit text, translations, interlinear duplicates and variant-detail columns. TAHOT primary word rows; Qere followed; L/Q/R/V and other main readings retained; X (reconstructed LXX additions) excluded; lexical roots only; bound affixes/punctuation (H9000+) excluded; identical root continuations after + counted once; dStrong senses aggregated to eStrong IDs, preserving eStrong suffixes; alternate-detail and interlinear rows not counted. Unicode whitespace normalized; gloss HTML entities decoded; senses merged by eStrong, alternate forms retained. No long definitions imported.",
+  "counts": {
+    "occurrences": 298656,
+    "termCount": 9296,
+    "termsWithFrequency": 9109
+  },
+  "generator": "tools/build_hebrew.py",
+  "mappingOverrides": {
+    "bytes": 495,
+    "path": "src/stepbible/mapping-overrides.json",
+    "sha256": "e2031b126f1c0c7dcb19c511cf50290f829632499bea4489bff318e652f150c0"
+  },
+  "outputs": [
+    {
+      "path": "docs/data/generated/hebrew.json",
+      "sha256": "d4b92521b2685f3aae23657ad5f3d2c544636895b642a396099d885acd637dd2"
+    },
+    {
+      "path": "docs/data/generated/hebrew-frequency-report.json",
+      "sha256": "50d1104ea17488199d60be9395e6a75be52a6debcf23ea7763f28d83b2ee1a82"
+    }
+  ],
+  "schemaVersion": 1,
+  "scripts": [
+    {
+      "bytes": 11687,
+      "path": "tools/build_hebrew.py",
+      "sha256": "a2f70d13a31a3d90958c430960882bb71c8c006816bc48181bd18029aa8d68d4"
+    },
+    {
+      "bytes": 2636,
+      "path": "tools/prepare_stepbible.py",
+      "sha256": "4902279806e069bef3167d8fa00ad1607ce17e9edd69ede16491db15eac2959b"
+    }
+  ],
+  "sourceLock": {
+    "bytes": 2504,
+    "path": "src/stepbible/sources.lock.json",
+    "sha256": "36c04fe507d748e971512f07b0591928376afdb3df53adcfb7a729b7928008c7"
+  },
+  "sources": [
+    {
+      "bytes": 719036,
+      "path": "src/stepbible/tbesh.tsv",
+      "sha256": "c961ebf09a36179a5a9e9c92477f832dd10e53f34c3ede265f9b18bc4676474f"
+    },
+    {
+      "bytes": 2879436,
+      "path": "src/stepbible/tahot-Gen-Deu.tsv",
+      "sha256": "eb541668878a9abd2b3dc41dc9a928410e06d4b3b67411af0c6d2e10b804c32c"
+    },
+    {
+      "bytes": 2818346,
+      "path": "src/stepbible/tahot-Isa-Mal.tsv",
+      "sha256": "4bebb91f68745eb676c2d329b78b8e764737fb86147b61261d52eededcc2d081"
+    },
+    {
+      "bytes": 1467873,
+      "path": "src/stepbible/tahot-Job-Sng.tsv",
+      "sha256": "a174ffe466705f57857bdb8631f9484b327eaaf98807ec1fe3ab786c60c100f3"
+    },
+    {
+      "bytes": 3827325,
+      "path": "src/stepbible/tahot-Jos-Est.tsv",
+      "sha256": "51e1c9146363ec92cc735b2cd4554bfdd88ab07e0cd73523662cca8fd5756657"
+    }
+  ],
+  "upstream": {
+    "attribution": "STEP Bible (https://www.STEPBible.org), based on work at Tyndale House Cambridge.",
+    "changes": "TBESH: retain columns eStrong through Gloss; omit Meaning entirely. TAHOT: retain only primary word-row reference, dStrongs, and grammar; omit text, translations, interlinear duplicates and variant-detail columns.",
+    "commit": "ed476a8ee6e3f7b3a46fc48af6c7dabc02387b1d",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "repository": "https://github.com/STEPBible/STEPBible-Data",
+    "sources": [
+      {
+        "kind": "tbesh",
+        "path": "src/stepbible/tbesh.tsv",
+        "sha256": "c961ebf09a36179a5a9e9c92477f832dd10e53f34c3ede265f9b18bc4676474f",
+        "upstreamPath": "Lexicons/TBESH - Translators Brief lexicon of Extended Strongs for Hebrew - STEPBible.org CC BY.txt",
+        "upstreamSha256": "464dccadd95fd8620dd05fa0d7a4caba58ec3c4d5db3ebf38e43d046ca25b591"
+      },
+      {
+        "kind": "tahot",
+        "path": "src/stepbible/tahot-Gen-Deu.tsv",
+        "sha256": "eb541668878a9abd2b3dc41dc9a928410e06d4b3b67411af0c6d2e10b804c32c",
+        "upstreamPath": "Translators Amalgamated OT+NT/TAHOT Gen-Deu - Translators Amalgamated Hebrew OT - STEPBible.org CC BY.txt",
+        "upstreamSha256": "e9b8546ee48fe0bfc57c3b70f5f40e98d96580e803526d19026224e31753368b"
+      },
+      {
+        "kind": "tahot",
+        "path": "src/stepbible/tahot-Isa-Mal.tsv",
+        "sha256": "4bebb91f68745eb676c2d329b78b8e764737fb86147b61261d52eededcc2d081",
+        "upstreamPath": "Translators Amalgamated OT+NT/TAHOT Isa-Mal - Translators Amalgamated Hebrew OT - STEPBible.org CC BY.txt",
+        "upstreamSha256": "f3ded203d2a74d6368932c97ae550d1d0754b271af491dc0dedf36fe3ba0bcc5"
+      },
+      {
+        "kind": "tahot",
+        "path": "src/stepbible/tahot-Job-Sng.tsv",
+        "sha256": "a174ffe466705f57857bdb8631f9484b327eaaf98807ec1fe3ab786c60c100f3",
+        "upstreamPath": "Translators Amalgamated OT+NT/TAHOT Job-Sng - Translators Amalgamated Hebrew OT - STEPBible.org CC BY.txt",
+        "upstreamSha256": "bb508af3af07822fca84cc43a0eba79eb70eecf672aabc0245b8d8cecf329d96"
+      },
+      {
+        "kind": "tahot",
+        "path": "src/stepbible/tahot-Jos-Est.tsv",
+        "sha256": "51e1c9146363ec92cc735b2cd4554bfdd88ab07e0cd73523662cca8fd5756657",
+        "upstreamPath": "Translators Amalgamated OT+NT/TAHOT Jos-Est - Translators Amalgamated Hebrew OT - STEPBible.org CC BY.txt",
+        "upstreamSha256": "195fee1dc3653bab33701f170734eb894ed647c10cd08cc61749375fe8b73775"
+      }
+    ]
+  }
+}
