@@ -2,12 +2,23 @@
 import json
 from pathlib import Path
 import struct
+import tempfile
 import unittest
+from unittest.mock import patch
+
+import build_pwa
 
 DOCS = Path(__file__).resolve().parents[1] / "docs"
 
 
 class PWAAssetsTests(unittest.TestCase):
+    def test_cache_version_uses_committed_text_line_endings(self):
+        with tempfile.TemporaryDirectory() as temporary, patch.object(build_pwa, "DOCS", Path(temporary)):
+            sample = b"first\r\nsecond\r\n"
+            (Path(temporary) / "index.html").write_bytes(sample)
+            (Path(temporary) / "logo.png").write_bytes(sample)
+            self.assertEqual(build_pwa.asset_bytes("index.html"), b"first\nsecond\n")
+            self.assertEqual(build_pwa.asset_bytes("logo.png"), sample)
     def test_manifest_is_relative_and_has_installable_icons(self):
         manifest = json.loads((DOCS / "manifest.webmanifest").read_bytes())
         self.assertEqual(manifest["start_url"], "./")

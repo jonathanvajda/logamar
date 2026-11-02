@@ -114,7 +114,8 @@ a {
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-start;
-  gap: 24px;
+  overflow-y: auto;
+  gap: 18px;
   padding: 34px 22px 24px;
   background: var(--primary-dark);
   color: var(--panel);
@@ -157,9 +158,9 @@ a {
 .top-nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 5px;
   flex-direction: column;
-  margin-top: 38px;
+  margin-top: 20px;
 }
 
 .top-nav a {
@@ -515,8 +516,15 @@ button:disabled {
   color: var(--primary-dark);
 }
 
+.related-app { margin-top: 0; display: flex; align-items: flex-start; gap: 10px; padding: 10px; border: 1px solid #ffffff40; border-radius: 8px; background: #ffffff0d; color: var(--panel); text-decoration: none; }
+.related-app:hover, .related-app:focus-visible { background: #ffffff1e; border-color: #ffffff85; }
+.related-app img { width: 38px; height: 38px; flex: none; border-radius: 7px; }
+.related-app strong, .related-app small { display: block; }
+.related-app strong { font-family: Georgia, "Times New Roman", serif; font-size: .98rem; }
+.related-app small { margin-top: 4px; color: #c1d3e7; font-size: .7rem; line-height: 1.4; }
 .install-button { margin-top: auto; background: #ffffff15; border: 1px solid #ffffff65; color: var(--panel); }
-.offline-status { margin-top: auto; color: #c1d3e7; font-size: 0.75rem; }
+.offline-status { margin-top: 0; color: #c1d3e7; font-size: 0.75rem; }
+.install-button[hidden] + .offline-status { margin-top: auto; }
 .install-button:not([hidden]) + .offline-status { margin-top: 0; }
 .pwa-update { padding: 16px; border: 1px solid var(--primary-light); background: var(--panel-soft); border-radius: 8px; margin-bottom: 20px; }
 .pwa-update p { margin: 0 0 10px; }
@@ -559,11 +567,15 @@ button:disabled {
     flex-wrap: wrap;
     align-items: center;
     gap: 16px;
+    overflow-y: visible;
   }
   .app-header ~ .app-shell { width: 100%; margin: 0; }
   .top-nav { margin: 0; flex-direction: row; flex: 1; justify-content: flex-end; gap: 3px; }
   .top-nav a { padding: 8px 9px; font-size: 0.8rem; }
   .offline-status { display: none; }
+  .related-app { margin-top: 0; order: 3; flex: 1 1 210px; }
+  .related-app small { max-width: 38ch; }
+  .install-button { order: 2; }
   .install-button { margin: 0; min-height: 34px; font-size: 0.8rem; }
   .report-stats .stat:nth-child(even) { border-right: 0; }
   .report-stats .stat { border-bottom: 1px solid var(--line); }
@@ -596,7 +608,8 @@ button:disabled {
   .app-shell { padding: 28px 16px 40px; }
   .app-header { padding: 14px 16px; }
   .brand { flex: 1; }
-  .install-button { order: 0; }
+  .related-app { flex-basis: 100%; }
+  .install-button { order: 2; }
   .top-nav { order: 1; }
   .hero-main { padding: 26px; }
   .stat { border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); }

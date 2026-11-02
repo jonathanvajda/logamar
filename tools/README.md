@@ -318,6 +318,9 @@ through the existing dictionary-form mapping and fails on unknown vocabulary.
 The bundled index includes all 66 books and dependent chapter/verse boundaries;
 it does not contain passage surface text or an English translation.
 
+`build_pwa.py` normalizes text asset line endings before hashing. Git stores these
+assets with LF, so the generated cache version matches Windows and Linux checkouts.
+
 Pool, import, report, and exam pure-function checks run with
 `node docs/tests/run.mjs`. The optional Playwright integration test is
 `node tools/test_pools.mjs`; set `PLAYWRIGHT_MODULE` to an existing Playwright
