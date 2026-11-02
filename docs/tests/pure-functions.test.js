@@ -1,3 +1,6 @@
+import { activePoolIds, stageCsv, vocabularyCsv, poolReport, parseCsv } from "../js/pools.js";
+import { parseReference } from "../js/passages.js";
+import { scoreExam } from "../js/exams.js";
 import { normalizeAnswer, checkTypedAnswer } from "../js/answer-checking.js";
 import { buildDistractors, frequencyBand } from "../js/distractors.js";
 import { generateFlashcardItems } from "../js/session-generator.js";
@@ -313,10 +316,64 @@ test("Aramaic language filtering is independent of Hebrew", () => {
   assert(generateFlashcardItems(terms, new Map(), { totalQuestions: 8 }).length === 2, "All-languages sessions should include Aramaic");
 });
 
+test("persistent pool sources overlap and manual releases survive source changes", () => {
+  const pool = { sources: [{ termIds: ["G1", "G2"] }, { termIds: ["G2", "G3"] }], releasedIds: ["G3"] };
+  assert(activePoolIds(pool).join() === "G1,G2", "Union must deduplicate and honor releases");
+  pool.sources[0].archived = true;
+  assert(activePoolIds(pool).join() === "G2", "Archive must retain overlapping words");
+});
+
+test("CSV handles quoted fields, BOM, headers, namespace and dictionary deduplication", () => {
+  const terms = [{ id: "G1", lemmaId: "G1" }, { id: "G2", lemmaId: "G1" }];
+  const staged = stageCsv('\uFEFFid,note\r\n0001,"a,b"\r\n2,"two\nlines"', terms, { namespace: "G" });
+  assert(staged.termIds.join() === "G1" && staged.duplicates === 1, "Canonical terms must deduplicate");
+  assert(stageCsv("1", terms, { header: false }).results[0].error, "Bare number must require namespace");
+  let failed = false; try { parseCsv('"unclosed'); } catch { failed = true; }
+  assert(failed, "Malformed CSV must fail");
+});
+
+test("normalized vocabulary CSV round trips and validates metadata", async () => {
+  const terms = [{ id: "G1", language: "greek", lemma: "word", glosses: ["a,b"] }];
+  const pool = { id: "list-1", name: "Chapter 7", revision: 2, sources: [{ termIds: ["G1"] }], releasedIds: [] };
+  const staged = stageCsv(await vocabularyCsv(pool, terms), terms);
+  assert(staged.termIds.join() === "G1" && staged.assignment.list_revision === "2", "Normalized list must retain IDs and revision");
+  assert(!staged.results[0].error, "Round trip must resolve");
+});
+
+test("saved pool sessions retain strong words and prefer unreviewed members", () => {
+  const terms = [progressTerm("G1", 100), progressTerm("G2", 20), progressTerm("G3", 1)];
+  const items = generateFlashcardItems(terms, new Map([["G2", { seenCount: 9, confidence: "strong" }]]), {
+    allowedIds: ["G1", "G2"], totalQuestions: 1, poolHistory: [{ termId: "G1", answeredAt: "2026-01-01" }]
+  });
+  assert(items.length === 1 && items[0].termId === "G2", "Known words must remain eligible and get coverage");
+  assert(generateFlashcardItems(terms, new Map(), { allowedIds: [], totalQuestions: 5 }).length === 0, "Empty saved pool must not fill from catalog");
+});
+
+test("pool reports keep released words in denominator and exclude unrelated activity", () => {
+  const pool = { id: "p", sources: [{ termIds: ["G1", "G2"] }], releasedIds: ["G2"] };
+  const rows = poolReport(pool, [], [], [{ poolId: "other", termId: "G1", answerGiven: "know" }, { poolId: "p", termId: "G2", answerGiven: "revisit" }]);
+  assert(rows.length === 2 && rows[0].reviews === 0 && rows[1].reviews === 1 && !rows[1].active, "Report scope and denominator must be explicit");
+});
+
+test("passage normalization validates aliases, single chapters, and ambiguous compact references", () => {
+  const index = { books: [{ id: "Jde", name: "Jude", chapters: { 1: { 1: ["G1"], 2: ["G2"], 3: ["G1"] } } }, { id: "1Jn", name: "1 John", chapters: { 1: { 4: ["G3"] } } }] };
+  assert(parseReference("Jude 1-3", index).termIds.length === 2, "Single chapter range must deduplicate");
+  assert(parseReference("1.Jo1:4", index).termIds[0] === "G3", "Explicit alias must normalize");
+  for (const ref of ["1.Jo14", "Jude 3-1", "Jude 1:9"]) {
+    let failed = false; try { parseReference(ref, index); } catch { failed = true; } assert(failed, "Invalid reference must fail: " + ref);
+  }
+});
+
+test("exam scoring uses frozen accepted answers and counts unanswered as zero", () => {
+  const definition = { app: "Logamar", type: "vocabulary-exam", version: 1, id: "e", name: "Chapter", questions: [{ termId: "G1", prompt: "word", accepted: ["to love", "love"] }, { termId: "G2", prompt: "other", accepted: ["other"] }] };
+  const result = scoreExam(definition, { G1: " Love! " });
+  assert(result.earned === 1 && result.possible === 2 && result.unanswered === 1 && result.percentage === 50, "Scored result must include unanswered questions");
+});
+
 for (const { name, fn } of tests) {
   const row = document.createElement("div");
   try {
-    fn();
+    await fn();
     row.className = "pass";
     row.textContent = `PASS ${name}`;
   } catch (error) {

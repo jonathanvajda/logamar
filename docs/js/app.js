@@ -1,4 +1,7 @@
-import { getAll, ensureProgress, putOne, putMany } from "./db.js";
+import { showPools } from "./render-pools.js";
+import { showExams } from "./exams.js";
+import { activePoolIds } from "./pools.js";
+import { getAll, ensureProgress, putOne, saveReview } from "./db.js";
 import { loadSeedData } from "./seed-data.js";
 import { createSession } from "./models.js";
 import { generateFlashcardItems } from "./session-generator.js";
@@ -32,7 +35,7 @@ let state = {
 
 window.addEventListener("hashchange", route);
 
-boot();
+boot().catch((error) => renderEmpty("Unable to open Logamar", error.message));
 
 async function boot() {
   state.terms = await loadSeedData();
@@ -58,11 +61,22 @@ async function route() {
     return;
   }
 
+  if (path === "/pools") {
+    await showPools(app, state.terms, [...state.selectedTermIds]);
+    return;
+  }
+
+  if (path === "/exams") {
+    await showExams(app);
+    return;
+  }
+
   if (path === "/setup") {
     await refreshProgress();
     const params = new URLSearchParams(queryString);
-    render(renderSetup({ terms: state.terms, progressRows: state.progressRows,
-      defaults: { pool: params.get("pool") ?? "all", language: params.get("language") ?? "both" },
+    const savedPools = (await getAll("studyPools")).filter((p) => !p.archived);
+    render(renderSetup({ savedPools, terms: state.terms, progressRows: state.progressRows,
+      defaults: { savedPoolId: params.get("savedPool") ?? "", pool: params.get("pool") ?? "all", language: params.get("language") ?? "both" },
       selectedIds: [...state.selectedTermIds] }));
     const form = document.querySelector("#setup-form");
     const updateCounts = () => updatePoolCounts(form, state.terms, state.progressRows, [...state.selectedTermIds]);
@@ -107,6 +121,14 @@ async function startSession(event) {
   event.preventDefault();
   const options = readSetupForm(event.currentTarget);
   options.selectedIds = [...state.selectedTermIds];
+  if (options.savedPoolId) {
+    const pool = (await getAll("studyPools")).find((p) => p.id === options.savedPoolId);
+    if (!pool) throw new Error("Saved pool no longer exists.");
+    options.allowedIds = activePoolIds(pool);
+    options.difficulty = "normal";
+    options.poolRevision = pool.revision;
+    options.poolHistory = (await getAll("sessionItems")).filter((h) => h.poolId === pool.id);
+  }
   await refreshProgress();
   const progressMap = new Map(state.progressRows.map((row) => [row.termId, row]));
   const items = generateFlashcardItems(state.terms, progressMap, options);
@@ -117,6 +139,7 @@ async function startSession(event) {
     return;
   }
 
+  delete options.poolHistory;
   state.activeSession = createSession({
     mode: "flashcard",
     languages: options.languages,
@@ -179,12 +202,12 @@ async function recordCard(choice) {
     usedHint: state.usedHint,
     now: new Date()
   });
-  await putOne("termProgress", updated);
-  state.progressRows = [...state.progressRows.filter((row) => row.termId !== item.termId), updated];
-  await putMany("sessionItems", [{
+  await saveReview(updated, {
     id: crypto.randomUUID(),
     sessionId: state.activeSession.id,
     termId: item.termId,
+    poolId: state.activeSession.filters.savedPoolId || null,
+    poolRevision: state.activeSession.filters.poolRevision ?? null,
     promptType: item.promptType,
     answerGiven: choice,
     correctAnswers: [],
@@ -194,7 +217,8 @@ async function recordCard(choice) {
     startedAt: state.activeSession.startedAt,
     answeredAt: new Date().toISOString(),
     elapsedMs: null
-  }]);
+  });
+  state.progressRows = [...state.progressRows.filter((row) => row.termId !== item.termId), updated];
 
   state.currentIndex += 1;
   state.revealed = false;
@@ -239,6 +263,7 @@ function showReport() {
     const count = state.selectedTermIds.size;
     const link = document.querySelector("#study-selected");
     link.hidden = count === 0; link.textContent = `Study selected (${count})`;
+    document.querySelector("#save-selected-pool").hidden = count === 0;
     document.querySelector("#selection-count").textContent = `${count} selected`;
     document.querySelector("#report-clear").disabled = count === 0;
   };

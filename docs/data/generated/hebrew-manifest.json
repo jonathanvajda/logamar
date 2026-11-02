@@ -32,9 +32,9 @@
   "schemaVersion": 1,
   "scripts": [
     {
-      "bytes": 12514,
+      "bytes": 12638,
       "path": "tools/build_hebrew.py",
-      "sha256": "3bb3a50a60231b0e705994111a0d05eee9fe261659d2c942e275f102074e2532"
+      "sha256": "f5fcab360a34e393c988bc139341a9d6154c4f9edf88680d2dcc96eabfcce557"
     },
     {
       "bytes": 2636,

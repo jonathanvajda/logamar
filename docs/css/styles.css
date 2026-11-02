@@ -603,3 +603,29 @@ button:disabled {
   .stat:nth-child(even) { border-right: 0; }
   .stat:nth-last-child(-n+2) { border-bottom: 0; }
 }
+
+@media print {
+  body.printing-pool-report .app-header, body.printing-pool-report footer, body.printing-pool-report #app .panel > :not(#pool-detail), body.printing-pool-report #pool-detail > :not(#pool-report-view), body.printing-pool-report #pool-report-view button { display: none !important; }
+  body.printing-pool-report #app, body.printing-pool-report .panel { padding: 0; margin: 0; max-width: none; box-shadow: none; }
+}
+
+@media print {
+  body.printing-exam-result .app-header, body.printing-exam-result footer, body.printing-exam-result #app .panel > :not(#exam-work), body.printing-exam-result #exam-result button { display: none !important; }
+  body.printing-exam-result #app, body.printing-exam-result .panel { margin: 0; padding: 0; max-width: none; box-shadow: none; }
+}
+
+.pool-panel table, .exam-panel table { width: 100%; border-collapse: collapse; text-align: left; margin: 1rem 0; }
+.pool-panel th, .pool-panel td, .exam-panel th, .exam-panel td { padding: .6rem; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.pool-panel .table-wrap, #passage-preview, #pool-report-view, #exam-authoring, #exam-result { overflow-x: auto; }
+.pool-panel > label, #pool-detail > label, #passage-picker label { margin-top: .7rem; }
+.pool-panel button, .exam-panel button { margin: .35rem .35rem .35rem 0; }
+.pool-panel input[type="checkbox"] { width: 1.15rem; height: 1.15rem; }
+@media (max-width: 640px) { .pool-panel .actions, .exam-panel .actions { flex-wrap: wrap; } #passage-picker label { display: block; } }
+
+.pool-panel table, .exam-panel table { min-width: 480px; }
+.pool-panel th, .exam-panel th { white-space: nowrap; }
+.pool-panel td:first-child, .pool-panel td:nth-child(2), .exam-panel td:first-child { overflow-wrap: normal; }
+.pool-panel .table-wrap { max-height: 32rem; overflow: auto; }
+#passage-preview, #csv-preview { max-height: 36rem; overflow: auto; }
+#pool-detail > .field { margin-top: 1rem; }
+@media print { .pool-panel table, .exam-panel table { min-width: 0; } #pool-report-view, #exam-result { overflow: visible; } }

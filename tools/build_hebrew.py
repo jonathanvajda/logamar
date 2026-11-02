@@ -78,7 +78,7 @@ def lexical_rows(lines):
     return groups, aliases, excluded
 
 
-def count_rows(rows, aliases, overrides=None):
+def count_rows(rows, aliases, overrides=None, on_word=None):
     overrides = overrides or {}
     numeric_targets = defaultdict(set)
     for target in aliases.values():
@@ -101,6 +101,8 @@ def count_rows(rows, aliases, overrides=None):
         books.add(book)
         ref = f"{book} {int(chapter)}:{int(verse)}"
         diagnostics["wordRows"] += 1
+        if on_word:
+            on_word(ref, set())
         if text_type.startswith("X"):
             diagnostics["excludedLxxAdditionRows"] += 1
             continue
@@ -144,6 +146,8 @@ def count_rows(rows, aliases, overrides=None):
             counts[identity] += 1
             if len(examples[identity]) < 3 and ref not in examples[identity]:
                 examples[identity].append(ref)
+        if on_word:
+            on_word(ref, lexical_ids)
         pending = {normalize(tag) for tag, continuation in roots if continuation}
         previous_verse = ref
     if pending:

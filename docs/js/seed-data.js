@@ -1,7 +1,7 @@
 import { clearStore, getAll, getOne, putMany, putOne } from "./db.js";
 import { normalizeTerm } from "./models.js";
 
-const SEED_VERSION = "2026-10-19-biblical-languages-v5";
+export const SEED_VERSION = "2026-10-19-biblical-languages-v5";
 const SEED_FILES = ["./data/generated/greek.json", "./data/generated/hebrew.json", "./data/generated/aramaic.json"];
 
 export async function loadSeedData() {

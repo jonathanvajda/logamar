@@ -20,7 +20,56 @@ Phase 1 lives in [`docs/`](./docs) for GitHub Pages deployment. It implements a 
 - study only revisit, due, new, learning, strong, previously studied, or manually selected cards
 - export/import progress JSON
 
-Test sessions, printable tests, answer keys, and full teacher templates are planned for Phase 2.
+Saved vocabulary pools, CSV exchange, passage imports, pool reports, and typed-gloss
+exams are available. Broader question types and full teacher templates remain planned.
+
+## Saved pools and classroom vocabulary
+
+Open **Pools** to create a named pool. Add selections from the Progress list, paste
+or upload a CSV, or preview vocabulary from a passage reference. CSV input supports
+header/no-header lists, an identifier column, canonical IDs, and Strong's IDs; bare
+numbers require a G/H namespace. Unknown items must be corrected before confirmation.
+Normalized vocabulary CSVs have their columns recognized automatically.
+
+Each addition belongs to a source group. A successful flashcard review never
+removes a member. Release/restore words in bulk, remove them from a chosen source,
+or archive an old passage group. Overlapping groups retain shared words. Changes
+offer undo. Pool names and optional target dates are editable; pools can be archived.
+
+Saved-pool sessions use dictionary forms and review words least recently seen in
+that pool, including confident words and words not yet due. Session sizes can
+exceed 50. Progress filters still narrow a session without changing membership.
+
+For a textbook chapter, create the teacher's pool, preview its terms, and choose
+**Download vocabulary CSV**. Students import that CSV into their own pools. Lists
+include canonical IDs, revision metadata, readable vocabulary, and a vocabulary
+fingerprint. The staging preview can also download normalized CSV without adding
+the source. Reimporting the same list revision is deduplicated; changed revisions
+can be kept as separate source groups, then the previous group archived.
+
+**Show progress report** reports practice performed in that pool and distinguishes
+it from global learning status. Reports retain inactive assigned words in their
+denominator and can be scoped to one source. Download CSV/JSON or print the report.
+Know ratings are self-assessment, not scored answers.
+
+To assign a scored test, choose **Prepare exam definition** in the pool, review
+and edit accepted glosses, and distribute its JSON file. Students import it under
+**Exams**, enter their identifier, and take the typed-gloss test. Answers save on
+leaving a field; unfinished attempts can resume after reload. Submission freezes
+the responses, rubric, and score. Results download as CSV/JSON or print. The
+offline app supports honor-system submissions: identity is self-reported and local
+exports are editable. It does not authenticate or proctor students.
+
+Passage entry supports explicit book aliases, chapter/verse ranges, and a dropdown
+picker with corpus-specific boundaries. Use `1 John 1:4`, not ambiguous compact
+forms such as `1.Jo14`. Single-chapter shorthand such as `Jude 5-8` is supported.
+Vocabulary follows the bundled TR Parsed NT and STEPBible TAHOT OT readings, not
+an arbitrary translation. Passage surface-form practice remains future work.
+
+All of these records remain local and are included in the version-2 JSON backup.
+Version-1 progress backups still import. Conflicting pool/exam IDs abort an import
+without overwriting local records; a separate browser profile can preserve both.
+The full passage index is precached for offline use (about 3.2 MB uncompressed).
 
 ## Run locally
 

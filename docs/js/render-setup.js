@@ -1,8 +1,9 @@
+import { activePoolIds, escapeHtml } from "./pools.js";
 import { matchesPool, POOLS } from "./progress.js";
 import { LANGUAGES } from "./models.js";
 import { studyContext } from "./study-context.js";
 
-export function renderSetup({ terms, progressRows = [], defaults = {}, selectedIds = [] }) {
+export function renderSetup({ terms, progressRows = [], defaults = {}, selectedIds = [], savedPools = [] }) {
   const counts = countTermsByPos(terms);
   const posOptions = [...counts.keys()].sort((a, b) => a.localeCompare(b));
   return `
@@ -13,6 +14,7 @@ export function renderSetup({ terms, progressRows = [], defaults = {}, selectedI
       <form id="setup-form" class="setup-form">
         <div class="setup-settings">
         <div class="option-grid">
+          <label class="field"><span>Vocabulary source</span><select name="savedPoolId"><option value="">Entire catalog</option>${savedPools.map((p) => `<option value="${escapeHtml(p.id)}" data-ids="${escapeHtml(JSON.stringify(activePoolIds(p)))}" ${p.id === defaults.savedPoolId ? "selected" : ""}>${escapeHtml(p.name)}</option>`).join("")}</select><small>Saved pools use dictionary forms and prioritize words least recently reviewed in this pool.</small></label>
           <label class="field">
             <span>Language</span>
             <select name="language">
@@ -23,7 +25,7 @@ export function renderSetup({ terms, progressRows = [], defaults = {}, selectedI
             </select>
           </label>
           <label class="field">
-            <span>Progress pool</span>
+            <span>Progress filter</span>
             <select name="progressPool">
               ${Object.entries(POOLS).map(([pool, label]) => `<option value="${pool}" ${pool === (defaults.pool ?? "all") ? "selected" : ""}>${label}</option>`).join("")}
             </select>
@@ -31,7 +33,7 @@ export function renderSetup({ terms, progressRows = [], defaults = {}, selectedI
           </label>
           <label class="field">
             <span>Number of terms</span>
-            <input name="totalQuestions" type="number" min="1" max="50" value="8">
+            <input name="totalQuestions" type="number" min="1" max="10000" value="8">
           </label>
           <label class="field">
             <span>Frequency band</span>
@@ -97,6 +99,8 @@ export function readSetupForm(form) {
   const data = new FormData(form);
   const language = data.get("language");
   return {
+    savedPoolId: data.get("savedPoolId") || "",
+    allowedIds: data.get("savedPoolId") ? JSON.parse(form.elements.savedPoolId.selectedOptions[0].dataset.ids) : undefined,
     mode: data.get("mode"),
     languages: language === "both" ? [...LANGUAGES] : [language],
     totalQuestions: Number(data.get("totalQuestions")),
@@ -111,8 +115,13 @@ export function readSetupForm(form) {
 export function updatePoolCounts(form, terms, progressRows, selectedIds = []) {
   const data = new FormData(form);
   const language = data.get("language");
-  const context = studyContext(terms, new Map(progressRows.map((row) => [row.termId, row])), data.get("difficulty"));
-  terms = context.terms;
+  const scoped = Boolean(data.get("savedPoolId"));
+  form.elements.difficulty.disabled = scoped;
+  form.elements.studyOrder.disabled = scoped;
+  if (scoped) form.elements.difficulty.value = "normal";
+  const allowed = scoped ? new Set(JSON.parse(form.elements.savedPoolId.selectedOptions[0].dataset.ids)) : null;
+  const context = studyContext(terms, new Map(progressRows.map((row) => [row.termId, row])), scoped ? "normal" : data.get("difficulty"));
+  terms = context.terms.filter((t) => !allowed || allowed.has(t.id));
   const progress = context.progressMap;
   selectedIds = selectedIds.map((id) => context.idMap.get(id) ?? id);
   for (const option of form.elements.progressPool.options) {

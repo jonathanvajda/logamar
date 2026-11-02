@@ -301,3 +301,26 @@ python tools/convert_openscriptures.py strongs `
 ```
 
 The converter writes stable JSON and a `data-manifest.json` with source hashes and record counts.
+
+## Persistent pools and passage data
+
+After generating vocabulary, build the offline passage-to-dictionary index:
+
+```powershell
+python tools/build_passages.py
+python tools/build_passages.py --check
+python tools/build_pwa.py
+```
+
+The passage builder reuses `count_strongs.tr_ids` and `build_hebrew.count_rows`,
+including their reading, lexical-ID, and continuation policies. It collapses IDs
+through the existing dictionary-form mapping and fails on unknown vocabulary.
+The bundled index includes all 66 books and dependent chapter/verse boundaries;
+it does not contain passage surface text or an English translation.
+
+Pool, import, report, and exam pure-function checks run with
+`node docs/tests/run.mjs`. The optional Playwright integration test is
+`node tools/test_pools.mjs`; set `PLAYWRIGHT_MODULE` to an existing Playwright
+installation if it is not installed locally. It uses a temporary browser profile
+and verifies migration, persistence, CSV exchange, overlapping passages, scoped
+review reports, resumable exams, backup conflicts/restoration, and offline previews.

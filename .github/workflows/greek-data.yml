@@ -19,4 +19,5 @@ jobs:
       - run: node docs/tests/run.mjs
       - run: python tools/build_greek.py --check
       - run: python tools/build_hebrew.py --check
+      - run: python tools/build_passages.py --check
       - run: python tools/build_pwa.py --check

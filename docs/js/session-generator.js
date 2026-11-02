@@ -30,7 +30,8 @@ export function generateFlashcardItems(terms, progressMap, options, now = new Da
   progressMap = context.progressMap;
   const selectedIds = (options.selectedIds ?? []).map((id) => context.idMap.get(id) ?? id);
   const pool = options.progressPool ?? "all";
-  const eligible = terms.filter((term) => matchesPool(term, progressMap.get(term.id), pool, now, selectedIds));
+  const allowed = options.allowedIds ? new Set(options.allowedIds) : null;
+  const eligible = terms.filter((term) => (!allowed || allowed.has(term.id)) && matchesPool(term, progressMap.get(term.id), pool, now, selectedIds));
   const filtered = filterTerms(eligible, options);
   const total = Math.max(1, Number(options.totalQuestions ?? 10));
   const mostCommonFirst = options.studyOrder === "frequency";
@@ -41,6 +42,17 @@ export function generateFlashcardItems(terms, progressMap, options, now = new Da
     id: `${term.id}-${index}`, termId: term.id, promptType: "lemma-to-gloss",
     studyFrequency: term.frequency, dictionaryMode: options.difficulty !== "hard"
   }));
+  if (allowed) {
+    // Oldest pool review first provides continuous coverage, including known words.
+    // Newly added terms get one turn, then join the back of the rotation.
+    const latest = new Map();
+    for (const h of options.poolHistory ?? []) {
+      latest.set(h.termId, Math.max(latest.get(h.termId) ?? 0, Date.parse(h.answeredAt) || 0));
+    }
+    const ordered = takeShuffled(filtered, filtered.length).sort((a, b) =>
+      (latest.get(a.id) ?? 0) - (latest.get(b.id) ?? 0));
+    return toItems(ordered.slice(0, total));
+  }
   if (pool !== "all") return toItems(choose(filtered, total));
   const buckets = {
     unseen: [],
