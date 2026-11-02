@@ -45,7 +45,9 @@ words. These section choices are remembered during the current page session.
 Each addition belongs to a source group. A successful flashcard review never
 removes a member. Release/restore words in bulk, remove them from a chosen source,
 or archive an old passage group. Overlapping groups retain shared words. Changes
-offer undo. Pool names and optional target dates are editable; pools can be archived.
+offer undo. Pool names and optional target dates are editable. Pool settings let
+you archive a pool or delete it after reviewing a confirmation; deleting removes
+its saved words and source groups while keeping study history and exam results.
 
 Saved-pool sessions use dictionary forms and review words least recently seen in
 that pool, including confident words and words not yet due. Session sizes can

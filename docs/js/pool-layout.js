@@ -19,7 +19,7 @@ export function organizePoolView(detail, pool, selectedCount) {
   };
   const settings = disclosure("Pool settings", "settings");
   const firstSetting = find("#pool-name").closest("label");
-  firstSetting.before(settings); moveRange(firstSetting, find("#archive-pool"), settings);
+  firstSetting.before(settings); moveRange(firstSetting, find("#delete-pool-confirmation"), settings);
 
   const report = disclosure("Reports and vocabulary export", "reports"); report.id = "pool-report-tools";
   report.hidden = !pool.sources.length;

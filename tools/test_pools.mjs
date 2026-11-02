@@ -162,7 +162,21 @@ try {
   await page.reload(); await page.locator("#saved-pool").selectOption(poolId);
   await page.screenshot({ path: resolve(tmpdir(), "logamar-pools-mobile.png"), fullPage: true });
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), "Pool page must fit a mobile screen");
+  // Deletion requires an explicit second action and preserves review and exam records.
+  await page.getByText("Pool settings", { exact: true }).click();
+  await page.locator("#delete-pool").click();
+  assert(await page.locator("#delete-pool-confirmation").isVisible());
+  await page.locator("#cancel-delete-pool").click();
+  assert(!await page.locator("#delete-pool-confirmation").isVisible());
+  assert.equal(await page.locator("#saved-pool").inputValue(), poolId);
+  await page.locator("#delete-pool").click();
+  await page.locator("#confirm-delete-pool").click();
+  await page.waitForFunction((id) => !document.querySelector(`#saved-pool option[value="${id}"]`), poolId);
+  const afterDelete = await page.evaluate(async () => (await import("./js/db.js")).exportUserData());
+  assert.equal(afterDelete.studyPools.length, 0);
+  assert.equal(afterDelete.examAttempts.length, 1);
+  assert(afterDelete.sessionItems.length > 0 && afterDelete.termProgress.length > 0);
   assert.deepEqual(errors, []);
-  console.log("PASS pool persistence, CSV round trip, scoped study/report, overlapping passages, scored exam, backup restore, and offline passage preview");
+  console.log("PASS pool persistence, CSV round trip, scoped study/report, overlapping passages, scored exam, backup restore, offline passage preview, and pool deletion");
   await second.close(); await context.close();
 } finally { await browser.close(); await new Promise((done) => server.close(done)); }

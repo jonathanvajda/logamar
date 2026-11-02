@@ -100,6 +100,23 @@ export async function savePool(pool, expectedRevision) {
   });
 }
 
+export async function deletePool(poolId, expectedRevision) {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("studyPools", "readwrite");
+    const store = tx.objectStore("studyPools");
+    let conflict = false;
+    const request = store.get(poolId);
+    request.onsuccess = () => {
+      if (!request.result || request.result.revision !== expectedRevision) { conflict = true; tx.abort(); return; }
+      store.delete(poolId);
+    };
+    tx.oncomplete = resolve;
+    tx.onabort = () => reject(new Error(conflict ? "This pool changed in another tab. Reopen Pools before deleting it." : "Pool could not be deleted."));
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
 export async function saveExamAttempt(attempt) {
   const db = await openDb();
   return new Promise((resolve, reject) => {

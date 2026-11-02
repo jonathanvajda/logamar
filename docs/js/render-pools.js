@@ -1,4 +1,4 @@
-import { getAll, putOne, savePool } from "./db.js";
+import { deletePool, getAll, putOne, savePool } from "./db.js";
 import { organizePoolView } from "./pool-layout.js";
 import { bindPassageImport } from "./passages.js";
 import { bindExamAuthoring } from "./exams.js";
@@ -31,7 +31,7 @@ export async function showPools(app, terms, selectedIds = []) {
       undo.onclick = async () => { try { await savePool({ ...original, revision: pool.revision + 1 }, pool.revision); await showPools(app, terms, selectedIds); app.querySelector("#saved-pool").value = pool.id; app.querySelector("#saved-pool").dispatchEvent(new Event("change")); } catch (error) { status(error.message); } };
     };
     const ids = new Set(activePoolIds(pool));
-    detail.innerHTML = `<label class="field">Pool name <input id="pool-name" value="${e(pool.name)}" maxlength="160"></label><label class="field">Target date (optional) <input id="pool-date" type="date" value="${e(pool.targetDate ?? "")}"></label><button id="save-pool-details">Save details</button><button id="archive-pool">${pool.archived ? "Restore pool" : "Archive pool"}</button><div class="actions"><a class="button" href="#/setup?savedPool=${encodeURIComponent(pool.id)}">Study ${ids.size} words</a><button id="vocab-export">Download vocabulary CSV</button><button id="pool-report">Show progress report</button></div><label class="field">Report / vocabulary export scope <select id="pool-report-scope"><option value="">All pool sources</option>${pool.sources.map((source) => `<option value="${e(source.id)}">${e(source.label)}${source.archived ? " (archived)" : ""}</option>`).join("")}</select></label><label class="field">Student name / identifier for report (optional) <input id="report-student" maxlength="160"></label>
+    detail.innerHTML = `<label class="field">Pool name <input id="pool-name" value="${e(pool.name)}" maxlength="160"></label><label class="field">Target date (optional) <input id="pool-date" type="date" value="${e(pool.targetDate ?? "")}"></label><button id="save-pool-details">Save details</button><button id="archive-pool">${pool.archived ? "Restore pool" : "Archive pool"}</button><button id="delete-pool" class="secondary">Delete pool</button><div id="delete-pool-confirmation" class="notice" role="alert" hidden><p>Delete <strong>${e(pool.name)}</strong> and its ${pool.sources.length} source groups? This removes its saved word list and pool reports. Study history and exam results remain saved.</p><button id="confirm-delete-pool">Delete this pool</button><button id="cancel-delete-pool" class="secondary">Cancel</button></div><div class="actions"><a class="button" href="#/setup?savedPool=${encodeURIComponent(pool.id)}">Study ${ids.size} words</a><button id="vocab-export">Download vocabulary CSV</button><button id="pool-report">Show progress report</button></div><label class="field">Report / vocabulary export scope <select id="pool-report-scope"><option value="">All pool sources</option>${pool.sources.map((source) => `<option value="${e(source.id)}">${e(source.label)}${source.archived ? " (archived)" : ""}</option>`).join("")}</select></label><label class="field">Student name / identifier for report (optional) <input id="report-student" maxlength="160"></label>
       <h2>Sources</h2>${pool.sources.map((s) => `<p>${e(s.label)}: ${s.termIds.length} words <button data-source="${e(s.id)}">${s.archived ? "Restore" : "Archive"}</button></p>`).join("") || "<p>No sources yet.</p>"}
       <button id="add-selected" ${!selectedIds.length ? "disabled" : ""}>Add ${selectedIds.length} selected progress words</button>
       <h2>Add from list</h2><p>Upload a CSV (commas), TSV (tabs), or TXT file (one entry per line), or paste a list below. Use a vocabulary ID such as <code>G3056</code>, or copy a word or transliteration from Logamar. If several words match, use its ID. Preview the result before adding it.</p><label class="field">Source label <input id="source-label" value="${e('List imported on ' + new Date().toLocaleDateString())}"></label>
@@ -49,6 +49,17 @@ export async function showPools(app, terms, selectedIds = []) {
       }).join("")}</tbody></table></div><div id="pool-report-view"></div>`;
     detail.querySelector("#save-pool-details").onclick = async () => { const name = detail.querySelector("#pool-name").value.trim(); if (!name) throw new Error("Enter a pool name."); pool.name = name; pool.targetDate = detail.querySelector("#pool-date").value; await save(); };
     detail.querySelector("#archive-pool").onclick = async () => { pool.archived = !pool.archived; await save(); };
+    const deleteConfirmation = detail.querySelector("#delete-pool-confirmation");
+    detail.querySelector("#delete-pool").onclick = () => { deleteConfirmation.hidden = false; detail.querySelector("#confirm-delete-pool").focus(); };
+    detail.querySelector("#cancel-delete-pool").onclick = () => { deleteConfirmation.hidden = true; detail.querySelector("#delete-pool").focus(); };
+    detail.querySelector("#confirm-delete-pool").onclick = async (event) => {
+      event.target.disabled = true;
+      try {
+        await deletePool(pool.id, pool.revision);
+        await showPools(app, terms, selectedIds);
+        status(`Deleted ${pool.name}. Study history and exam results remain saved.`);
+      } catch (error) { event.target.disabled = false; status(error.message); }
+    };
     await bindPassageImport(detail, pool, terms, save, status);
     await bindExamAuthoring(detail, pool, terms, status);
     organizePoolView(detail, pool, selectedIds.length);
