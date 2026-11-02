@@ -1,4 +1,4 @@
-import { activePoolIds, stageCsv, vocabularyCsv, poolReport, parseCsv } from "../js/pools.js";
+import { activePoolIds, stageCsv, stageList, vocabularyCsv, poolReport, parseCsv } from "../js/pools.js";
 import { parseReference } from "../js/passages.js";
 import { scoreExam } from "../js/exams.js";
 import { normalizeAnswer, checkTypedAnswer } from "../js/answer-checking.js";
@@ -330,6 +330,29 @@ test("CSV handles quoted fields, BOM, headers, namespace and dictionary deduplic
   assert(stageCsv("1", terms, { header: false }).results[0].error, "Bare number must require namespace");
   let failed = false; try { parseCsv('"unclosed'); } catch { failed = true; }
   assert(failed, "Malformed CSV must fail");
+});
+
+test("list imports accept TXT and TSV without dropping the first vocabulary entry", () => {
+  const terms = [{ id: "G3056" }, { id: "G26" }];
+  const text = stageList("\uFEFFG3056\r\nG26\r\nG3056", terms);
+  assert(text.format === "txt" && !text.header && text.termIds.length === 2 && text.duplicates === 1, "TXT must keep its first entry and deduplicate");
+  const tabbed = stageList('term_id\tnote\nG3056\t"a,b"\nG26\t"two\nlines"', terms);
+  assert(tabbed.format === "tsv" && tabbed.header && tabbed.termIds.length === 2, "TSV must detect headers and support quoted fields");
+  const unknown = stageList("unknown\nG26", terms);
+  assert(unknown.results[0].error && unknown.results.length === 2, "Unknown first entries must not be silently treated as headers");
+  const explicit = stageList("Custom title\nG26", terms, { format: "txt", header: true, column: 8 });
+  assert(explicit.termIds[0] === "G26", "TXT must support explicit headers and always use its one column");
+});
+
+test("manual lists resolve unique dictionary forms and flag ambiguous spellings", () => {
+  const terms = [
+    { id: "G3056", lemma: "?????", transliteration: "logos" },
+    { id: "H1", lemma: "?", transliteration: "shared" },
+    { id: "H2", lemma: "?", transliteration: "shared" }
+  ];
+  const staged = stageList("?????\nlogos\nshared", terms);
+  assert(staged.termIds.join() === "G3056" && staged.duplicates === 1, "Dictionary form and transliteration should share one canonical term");
+  assert(staged.results.at(-1).error.includes("Ambiguous"), "Ambiguous transliteration must require an ID");
 });
 
 test("normalized vocabulary CSV round trips and validates metadata", async () => {

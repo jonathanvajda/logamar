@@ -7,19 +7,19 @@ export function activePoolIds(pool) {
   return [...new Set(pool.sources.filter((s) => !s.archived).flatMap((s) => s.termIds.filter((id) => !(s.excludedIds ?? []).includes(id))))].filter((id) => !released.has(id));
 }
 
-export function parseCsv(text) {
+export function parseCsv(text, delimiter = ",") {
   const rows = []; let row = [], field = "", quoted = false, closedQuote = false;
   text = text.replace(/^\uFEFF/, "");
   for (let i = 0; i < text.length; i++) {
     const c = text[i];
-    if (closedQuote && ![",", "\r", "\n"].includes(c)) throw new Error("Unexpected text after a quoted CSV field.");
+    if (closedQuote && ![delimiter, "\r", "\n"].includes(c)) throw new Error("Unexpected text after a quoted list field.");
     if (c === '"') {
       if (quoted && text[i + 1] === '"') { field += '"'; i++; }
       else if (quoted || field === "") { closedQuote = quoted; quoted = !quoted; }
       else throw new Error("Unexpected quote in CSV field.");
-    } else if (!quoted && (c === "," || c === "\n" || c === "\r")) {
+    } else if (!quoted && (c === delimiter || c === "\n" || c === "\r")) {
       row.push(field); field = ""; closedQuote = false;
-      if (c !== ",") { if (row.some((v) => v.trim())) rows.push(row); row = []; if (c === "\r" && text[i + 1] === "\n") i++; }
+      if (c !== delimiter) { if (row.some((v) => v.trim())) rows.push(row); row = []; if (c === "\r" && text[i + 1] === "\n") i++; }
     } else field += c;
   }
   if (quoted) throw new Error("Unclosed quoted CSV field.");
@@ -33,8 +33,11 @@ export function csv(rows) {
 export function safeText(value) { return /^[\s]*[=+@-]/.test(value) || /^[\t\r\n]/.test(value) ? "'" + value : value; }
 export function escapeHtml(value) { return String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 
-export function stageCsv(text, terms, { header = true, column = 0, namespace = "" } = {}) {
-  const rows = parseCsv(text); const headings = header ? rows.shift()?.map((s) => s.trim()) ?? [] : [];
+export function stageCsv(text, terms, { header = true, column = 0, namespace = "", format = "csv" } = {}) {
+  if (!["csv", "tsv", "txt"].includes(format)) throw new Error("Choose CSV, TSV, or plain text.");
+  const rows = format === "txt" ? text.replace(/^\uFEFF/, "").split(/\r\n|\r|\n/).filter((line) => line.trim()).map((line) => [line.trim()]) : parseCsv(text, format === "tsv" ? "\t" : ",");
+  if (header === "auto") header = rows[0]?.some((v) => /^(?:term[_ ]?id|id|strong'?s?(?:[_ ]?(?:id|number))?|format_version)$/i.test(v.trim())) ?? false;
+  const headings = header ? rows.shift()?.map((s) => s.trim()) ?? [] : [];
   if (headings.length !== new Set(headings).size) throw new Error("CSV column names must be unique.");
   const normalized = headings.includes("format_version") && headings.includes("term_id");
   if (!rows.length) throw new Error("The list has no vocabulary rows.");
@@ -51,6 +54,16 @@ export function stageCsv(text, terms, { header = true, column = 0, namespace = "
   }
   if (normalized) column = headings.indexOf("term_id");
   const byId = new Map(terms.map((t) => [t.id, t]));
+  const bySpelling = new Map();
+  const spellingKey = (value) => value.trim().normalize("NFC").toLocaleLowerCase();
+  for (const term of terms) {
+    for (const label of [term.lemma, term.transliteration]) {
+      if (!label?.trim()) continue;
+      const key = spellingKey(label);
+      if (!bySpelling.has(key)) bySpelling.set(key, new Set());
+      bySpelling.get(key).add(term.lemmaId ?? term.id);
+    }
+  }
   const results = [], seen = new Set(); let duplicates = 0;
   for (const [index, row] of rows.entries()) {
     const value = row[column]?.trim() ?? "";
@@ -61,7 +74,13 @@ export function stageCsv(text, terms, { header = true, column = 0, namespace = "
       if (/^\d+$/.test(id) && namespace) id = namespace + id;
       id = id.replace(/^([GH])0+(?=\d)/, "$1");
     }
-    const term = byId.get(id); let error = term ? "" : "Unknown ID (bare numbers need a namespace)";
+    let term = byId.get(id); let error = "";
+    if (!term && !normalized) {
+      const candidates = bySpelling.get(spellingKey(value));
+      if (candidates?.size === 1) term = byId.get([...candidates][0]);
+      else if (candidates?.size > 1) error = "Ambiguous word; use a vocabulary ID";
+    }
+    if (!term && !error) error = "Unknown word or ID (bare numbers need a namespace)";
     if (normalized) {
       if (row[headings.indexOf("format_version")] !== "1") error = "Unsupported CSV version";
       if (headings.includes("language") && term && row[headings.indexOf("language")] !== term.language) error = "Language mismatch";
@@ -71,7 +90,23 @@ export function stageCsv(text, terms, { header = true, column = 0, namespace = "
     if (!error) seen.add(canonical);
     results.push({ row: index + (header ? 2 : 1), input: value, term: byId.get(canonical), error });
   }
-  return { results, duplicates, termIds: [...seen], assignment };
+  return { results, duplicates, termIds: [...seen], assignment, format, header };
+}
+
+export function stageList(text, terms, options = {}) {
+  let format = options.format ?? "auto";
+  if (format === "auto") {
+    let quoted = false, comma = false, tab = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (c === '"') { if (quoted && text[i + 1] === '"') i++; else quoted = !quoted; }
+      if (!quoted && (c === "\n" || c === "\r")) { if (comma || tab || text.slice(0, i).trim()) break; }
+      if (!quoted && c === ",") comma = true;
+      if (!quoted && c === "\t") tab = true;
+    }
+    format = tab ? "tsv" : comma ? "csv" : "txt";
+  }
+  return stageCsv(text, terms, { header: "auto", ...options, column: format === "txt" ? 0 : options.column ?? 0, format });
 }
 
 export async function vocabularyCsv(pool, terms) {

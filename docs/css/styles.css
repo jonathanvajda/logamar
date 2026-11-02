@@ -605,7 +605,7 @@ button:disabled {
 }
 
 @media print {
-  body.printing-pool-report .app-header, body.printing-pool-report footer, body.printing-pool-report #app .panel > :not(#pool-detail), body.printing-pool-report #pool-detail > :not(#pool-report-view), body.printing-pool-report #pool-report-view button { display: none !important; }
+  body.printing-pool-report .app-header, body.printing-pool-report footer, body.printing-pool-report #app .panel > :not(#pool-detail), body.printing-pool-report #pool-detail > :not(#pool-report-tools), body.printing-pool-report #pool-report-view button { display: none !important; }
   body.printing-pool-report #app, body.printing-pool-report .panel { padding: 0; margin: 0; max-width: none; box-shadow: none; }
 }
 
@@ -629,3 +629,18 @@ button:disabled {
 #passage-preview, #csv-preview { max-height: 36rem; overflow: auto; }
 #pool-detail > .field { margin-top: 1rem; }
 @media print { .pool-panel table, .exam-panel table { min-width: 0; } #pool-report-view, #exam-result { overflow: visible; } }
+
+.pool-disclosure { border-top: 1px solid var(--line); margin-top: 1rem; padding-top: .8rem; }
+.pool-disclosure > summary { cursor: pointer; font-weight: 600; padding: .4rem 0; }
+.pool-disclosure[open] > summary { margin-bottom: .7rem; }
+.pool-add-methods { margin-top: 1.2rem; }
+.pool-add-methods fieldset { border: 1px solid var(--line); border-radius: .6rem; padding: .8rem; display: flex; flex-wrap: wrap; gap: .65rem 1.2rem; }
+.pool-add-methods fieldset label { display: inline-flex; align-items: center; gap: .4rem; }
+.pool-add-methods > section { margin-top: 1rem; }
+.pool-panel [hidden] { display: none !important; }
+@media print { body.printing-pool-report #pool-report-tools > :not(#pool-report-view) { display: none !important; } }
+
+.pool-add-methods fieldset label { align-items: flex-start; flex: 1 1 240px; }
+.pool-add-methods fieldset label input { flex-shrink: 0; margin-top: .25rem; }
+.pool-add-methods fieldset label strong, .pool-add-methods fieldset label small { display: block; }
+.pool-add-methods fieldset label small { color: var(--muted); margin-top: .25rem; font-weight: normal; }

@@ -26,10 +26,21 @@ exams are available. Broader question types and full teacher templates remain pl
 ## Saved pools and classroom vocabulary
 
 Open **Pools** to create a named pool. Add selections from the Progress list, paste
-or upload a CSV, or preview vocabulary from a passage reference. CSV input supports
+or upload a CSV, TSV, or TXT list, or preview vocabulary from a passage reference. List input supports
 header/no-header lists, an identifier column, canonical IDs, and Strong's IDs; bare
 numbers require a G/H namespace. Unknown items must be corrected before confirmation.
 Normalized vocabulary CSVs have their columns recognized automatically.
+
+Under **Choose how to add words**, **Add from list** is shown by default; check
+**Add from Bible reference** or **Add selected words** to show those inputs too.
+Each option includes guidance for exam lists, textbook chapters, sermon preparation,
+and reading groups. TXT files use one entry per line; IDs, exact dictionary forms, and unambiguous
+transliterations resolve to catalog words. CSV and TSV files
+use comma- or tab-separated columns. The format and header are detected automatically
+and can be overridden in List options. Unchecking a method keeps its draft while
+the page is open. List options, word/source management, reports/export, exam creation,
+and pool settings expand only when needed. Word actions appear after selecting
+words. These section choices are remembered during the current page session.
 
 Each addition belongs to a source group. A successful flashcard review never
 removes a member. Release/restore words in bulk, remove them from a chosen source,

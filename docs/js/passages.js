@@ -53,7 +53,7 @@ export function parseReference(input, index) {
 
 export async function bindPassageImport(container, pool, terms, save, status) {
   const host = document.createElement("section");
-  host.innerHTML = `<h2>Add words from passages</h2><p>Dictionary forms from TR Parsed NT / STEPBible TAHOT OT.</p>
+  host.innerHTML = `<h2>Add from Bible reference</h2><p>Choose the passages you want to study, and Logamar gathers their dictionary-form vocabulary.</p><p>Paste references such as John 1:1-5, or choose a book and verse range below. Preview the words before adding them. Vocabulary follows TR Parsed NT / STEPBible TAHOT OT.</p>
     <label class="field">Paste references, one per line<textarea id="passage-text" rows="3" placeholder="John 1:1-5"></textarea></label>
     <button id="show-passage-picker">Choose book and verses</button><div id="passage-picker"></div>
     <button id="preview-passage">Preview passage words</button><div id="passage-preview"></div>`;

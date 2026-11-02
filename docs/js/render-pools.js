@@ -1,17 +1,18 @@
 import { getAll, putOne, savePool } from "./db.js";
+import { organizePoolView } from "./pool-layout.js";
 import { bindPassageImport } from "./passages.js";
 import { bindExamAuthoring } from "./exams.js";
 import { SEED_VERSION } from "./seed-data.js";
 import { studyContext } from "./study-context.js";
-import { activePoolIds, stageCsv, vocabularyCsv, poolReport, csv, safeText, escapeHtml as e, download, vocabularyFingerprint } from "./pools.js";
+import { activePoolIds, stageList, vocabularyCsv, poolReport, csv, safeText, escapeHtml as e, download, vocabularyFingerprint } from "./pools.js";
 
 export async function showPools(app, terms, selectedIds = []) {
   const pools = await getAll("studyPools");
   const options = pools.map((p) => `<option value="${e(p.id)}">${e(p.name)}${p.archived ? " (archived)" : ""} (${activePoolIds(p).length})</option>`).join("");
   app.innerHTML = `<section class="panel pool-panel"><h1>Saved study pools</h1>
-    <p>Words stay until you release them. Source groups can overlap; archiving one keeps words needed by another.</p>
+    <p>Words stay in your pool until you release them.</p>
     <form id="create-pool" class="actions"><label>New pool name <input name="name" required maxlength="160"></label><button>Create pool</button></form>
-    <label class="field">Pool <select id="saved-pool"><option value="">Choose a pool</option>${options}</select></label>
+    <label class="field" ${!pools.length ? "hidden" : ""}>Pool <select id="saved-pool"><option value="">Choose a pool</option>${options}</select></label>
     <div id="pool-detail"></div><p id="pool-status" role="status"></p></section>`;
   const status = (message) => { app.querySelector("#pool-status").textContent = message; };
   app.querySelector("#create-pool").onsubmit = async (event) => {
@@ -33,10 +34,10 @@ export async function showPools(app, terms, selectedIds = []) {
     detail.innerHTML = `<label class="field">Pool name <input id="pool-name" value="${e(pool.name)}" maxlength="160"></label><label class="field">Target date (optional) <input id="pool-date" type="date" value="${e(pool.targetDate ?? "")}"></label><button id="save-pool-details">Save details</button><button id="archive-pool">${pool.archived ? "Restore pool" : "Archive pool"}</button><div class="actions"><a class="button" href="#/setup?savedPool=${encodeURIComponent(pool.id)}">Study ${ids.size} words</a><button id="vocab-export">Download vocabulary CSV</button><button id="pool-report">Show progress report</button></div><label class="field">Report / vocabulary export scope <select id="pool-report-scope"><option value="">All pool sources</option>${pool.sources.map((source) => `<option value="${e(source.id)}">${e(source.label)}${source.archived ? " (archived)" : ""}</option>`).join("")}</select></label><label class="field">Student name / identifier for report (optional) <input id="report-student" maxlength="160"></label>
       <h2>Sources</h2>${pool.sources.map((s) => `<p>${e(s.label)}: ${s.termIds.length} words <button data-source="${e(s.id)}">${s.archived ? "Restore" : "Archive"}</button></p>`).join("") || "<p>No sources yet.</p>"}
       <button id="add-selected" ${!selectedIds.length ? "disabled" : ""}>Add ${selectedIds.length} selected progress words</button>
-      <h2>Add CSV list</h2><label class="field">Source label <input id="source-label" value="${e('CSV imported on ' + new Date().toLocaleDateString())}"></label>
-      <label class="field">Upload CSV <input id="csv-file" type="file" accept=".csv,text/csv"></label>
-      <label class="field">Or paste CSV <textarea id="pool-csv" rows="6"></textarea></label>
-      <label><input id="csv-header" type="checkbox" checked> First row is a header</label>
+      <h2>Add from list</h2><p>Upload a CSV (commas), TSV (tabs), or TXT file (one entry per line), or paste a list below. Use a vocabulary ID such as <code>G3056</code>, or copy a word or transliteration from Logamar. If several words match, use its ID. Preview the result before adding it.</p><label class="field">Source label <input id="source-label" value="${e('List imported on ' + new Date().toLocaleDateString())}"></label>
+      <label class="field">Upload list (CSV, TSV, or TXT) <input id="csv-file" type="file" accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values,text/plain"></label>
+      <label class="field">Or paste a list <textarea id="pool-csv" rows="6" placeholder="G3056&#10;G26"></textarea></label>
+      <label class="field">List format <select id="list-format"><option value="auto">Detect automatically</option><option value="csv">CSV (comma-separated)</option><option value="tsv">TSV (tab-separated)</option><option value="txt">TXT (one entry per line)</option></select></label><label class="field">First row <select id="csv-header"><option value="auto">Detect a header automatically</option><option value="yes">Header / column names</option><option value="no">Vocabulary entry</option></select></label>
       <label>Identifier column (starting at 1) <input id="csv-column" type="number" min="1" value="1"></label>
       <label>Bare number namespace <select id="csv-namespace"><option value="">Require prefix</option><option value="G">Greek (G)</option><option value="H">Hebrew/Aramaic (H)</option></select></label>
       <button id="preview-csv">Preview list</button><div id="csv-preview"></div>
@@ -50,6 +51,7 @@ export async function showPools(app, terms, selectedIds = []) {
     detail.querySelector("#archive-pool").onclick = async () => { pool.archived = !pool.archived; await save(); };
     await bindPassageImport(detail, pool, terms, save, status);
     await bindExamAuthoring(detail, pool, terms, status);
+    organizePoolView(detail, pool, selectedIds.length);
     for (const button of detail.querySelectorAll("[data-source]")) button.onclick = async () => {
       const source = pool.sources.find((s) => s.id === button.dataset.source);
       const before = new Set(activePoolIds(pool));
@@ -73,8 +75,8 @@ export async function showPools(app, terms, selectedIds = []) {
       chosen.forEach((id) => release ? released.add(id) : released.delete(id)); pool.releasedIds = [...released]; await save();
     };
     for (const [button, exclude] of [["#exclude-source-words", true], ["#include-source-words", false]]) detail.querySelector(button).onclick = async () => {
-      const source = pool.sources.find((s) => s.id === detail.querySelector("#pool-report-scope").value);
-      if (!source) throw new Error("Choose a source in the report / vocabulary export scope first.");
+      const source = pool.sources.find((s) => s.id === detail.querySelector("#word-source").value);
+      if (!source) throw new Error("Choose a source for the selected words first.");
       const chosen = [...detail.querySelectorAll(".pool-word:checked")].map((i) => i.value).filter((id) => source.termIds.includes(id));
       const excluded = new Set(source.excludedIds ?? []); chosen.forEach((id) => exclude ? excluded.add(id) : excluded.delete(id)); source.excludedIds = [...excluded]; await save();
     };
@@ -89,20 +91,25 @@ export async function showPools(app, terms, selectedIds = []) {
     };
     const preview = detail.querySelector("#csv-preview");
     let stagingRevision = 0;
-    for (const input of detail.querySelectorAll("#pool-csv, #csv-header, #csv-column, #csv-namespace, #source-label")) input.oninput = () => { stagingRevision++; preview.replaceChildren(); };
-    detail.querySelector("#csv-file").onchange = async (event) => { const file = event.target.files[0]; if (file) detail.querySelector("#pool-csv").value = await file.text(); preview.replaceChildren(); };
+    for (const input of detail.querySelectorAll("#pool-csv, #list-format, #csv-header, #csv-column, #csv-namespace, #source-label")) input.oninput = () => { stagingRevision++; preview.replaceChildren(); };
+    detail.querySelector("#csv-file").onchange = async (event) => { const file = event.target.files[0]; if (file) {
+      stagingRevision++; preview.replaceChildren();
+      detail.querySelector("#pool-csv").value = await file.text();
+      const extension = file.name.split(".").at(-1).toLowerCase();
+      detail.querySelector("#list-format").value = ["csv", "tsv", "txt"].includes(extension) ? extension : "auto";
+    } preview.replaceChildren(); };
     detail.querySelector("#preview-csv").onclick = async () => {
       try {
         const revision = stagingRevision;
-        const staged = stageCsv(detail.querySelector("#pool-csv").value, terms, { header: detail.querySelector("#csv-header").checked, column: Number(detail.querySelector("#csv-column").value) - 1, namespace: detail.querySelector("#csv-namespace").value });
+        const staged = stageList(detail.querySelector("#pool-csv").value, terms, { format: detail.querySelector("#list-format").value, header: detail.querySelector("#csv-header").value === "auto" ? "auto" : detail.querySelector("#csv-header").value === "yes", column: Number(detail.querySelector("#csv-column").value) - 1, namespace: detail.querySelector("#csv-namespace").value });
         const errors = staged.results.filter((r) => r.error).length;
         if (!errors && staged.assignment?.vocabulary_fingerprint && await vocabularyFingerprint(staged.termIds) !== staged.assignment.vocabulary_fingerprint) throw new Error("The vocabulary does not match the list fingerprint. Ask for a corrected list or update the app if dictionary mappings changed.");
         if (revision !== stagingRevision) return;
-        preview.innerHTML = `<p>${staged.termIds.length} unique words; ${staged.duplicates} duplicates; ${errors} unresolved. ${staged.termIds.filter((id) => !ids.has(id) && !pool.releasedIds.includes(id)).length} new active words. Previously released words stay released.</p>
+        preview.innerHTML = `<p>${staged.format.toUpperCase()} list; ${staged.header ? "first row treated as a header" : "first row treated as a vocabulary entry"}.</p><p>${staged.termIds.length} unique words; ${staged.duplicates} duplicates; ${errors} unresolved. ${staged.termIds.filter((id) => !ids.has(id) && !pool.releasedIds.includes(id)).length} new active words. Previously released words stay released.</p>
           <div class="table-wrap"><table><thead><tr><th>Row</th><th>Input</th><th>Word</th><th>Result</th></tr></thead><tbody>${staged.results.map((r) => `<tr><td>${r.row}</td><td>${e(r.input)}</td><td>${e(r.term?.lemma)}</td><td>${e(r.error || (pool.releasedIds.includes(r.term.id) ? "Previously released" : ids.has(r.term.id) ? "Already active" : "New"))}</td></tr>`).join("")}</tbody></table></div>
           <button id="stage-export" ${errors || !staged.termIds.length ? "disabled" : ""}>Download normalized CSV</button>
           <button id="commit-csv" ${errors || !staged.termIds.length ? "disabled" : ""}>Confirm adding ${staged.termIds.length} source associations</button>`;
-        const source = { id: crypto.randomUUID(), label: staged.assignment?.list_name || detail.querySelector("#source-label").value.trim() || "CSV list", assignment: staged.assignment, termIds: staged.termIds, archived: false };
+        const source = { id: crypto.randomUUID(), label: staged.assignment?.list_name || detail.querySelector("#source-label").value.trim() || "Vocabulary list", assignment: staged.assignment, termIds: staged.termIds, archived: false };
         preview.querySelector("#stage-export").onclick = async () => download("logamar-vocabulary.csv", await vocabularyCsv({ id: source.assignment?.list_id ?? source.id, revision: source.assignment?.list_revision ?? 1, name: source.label, sources: [source], releasedIds: [] }, terms));
         preview.querySelector("#commit-csv").onclick = async (event) => {
           event.target.disabled = true;
