@@ -36,25 +36,25 @@ try {
   await page.goto(url);
   await page.getByRole("heading", { name: "Build fluency one word at a time." }).waitFor();
   const related = page.locator(".related-app");
-  assert.equal(await related.getAttribute("href"), "https://jonathanvajda.github.io/Reformanda/");
+  assert.equal(await related.locator("a").getAttribute("href"), "https://jonathanvajda.github.io/Reformanda/");
   assert.equal(await related.locator("img").evaluate((img) => img.naturalWidth), 192, "Reformanda logo must load");
+  assert.equal(await page.locator("footer.app-shell > .related-app").count(), 1, "Reformanda link belongs in the page footer");
+  assert.equal(await page.locator(".app-header .related-app").count(), 0, "Mobile header must not contain the Reformanda link");
   const placement = await page.evaluate(() => ({
     nav: document.querySelector(".top-nav").getBoundingClientRect(),
-    related: document.querySelector(".related-app").getBoundingClientRect(),
     install: document.querySelector("#install-app").getBoundingClientRect(),
     status: document.querySelector("#offline-status").getBoundingClientRect()
   }));
-  assert.ok(placement.nav.bottom < placement.install.top && placement.install.bottom < placement.status.top && placement.status.bottom < placement.related.top,
-    "Install, app status, and related app stay together below navigation on desktop");
+  assert.ok(placement.nav.bottom < placement.install.top && placement.install.bottom < placement.status.top,
+    "Install and app status stay below navigation on desktop");
   assert.ok(await page.locator("#offline-status").evaluate((element) => element.getBoundingClientRect().bottom <= innerHeight),
     "Offline status remains visible at a standard desktop height");
   await page.locator("#install-app").evaluate((button) => { button.hidden = true; });
   assert.ok(await page.evaluate(() => {
     const nav = document.querySelector(".top-nav").getBoundingClientRect();
     const status = document.querySelector("#offline-status").getBoundingClientRect();
-    const related = document.querySelector(".related-app").getBoundingClientRect();
-    return nav.bottom < status.top && status.bottom < related.top;
-  }), "Status and related app stay below navigation when install is hidden");
+    return nav.bottom < status.top;
+  }), "Status stays below navigation when install is hidden");
   await page.locator("#install-app").evaluate((button) => { button.hidden = false; });
   await page.screenshot({ path: resolve(tmpdir(), "logamar-reformanda-desktop.png") });
   await page.waitForFunction(() => navigator.serviceWorker.controller && document.querySelector("#offline-status").textContent === "Ready for offline study");
@@ -107,9 +107,15 @@ try {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("heading", { name: "Your progress, made visible." }).waitFor();
   assert.equal(await related.isVisible(), true);
-  assert.ok(await page.evaluate(() => document.querySelector("#install-app").getBoundingClientRect().bottom < document.querySelector(".related-app").getBoundingClientRect().top));
+  assert.ok(await page.evaluate(() => document.querySelector("#app").getBoundingClientRect().bottom <= document.querySelector(".related-app").getBoundingClientRect().top),
+    "Reformanda link appears below page content on mobile");
   await page.screenshot({ path: resolve(tmpdir(), "logamar-reformanda-mobile.png"), fullPage: true });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, "Mobile layout must fit");
+  await page.getByRole("button", { name: "Dismiss Reformanda suggestion" }).click();
+  assert.equal(await related.isVisible(), false, "Dismiss hides the suggestion");
+  await page.reload();
+  await page.getByRole("heading", { name: "Your progress, made visible." }).waitFor();
+  assert.equal(await related.isVisible(), false, "Dismissal persists after reload");
   assert.deepEqual(errors, []);
   console.log("PWA checks passed: subdirectory scope, installability, offline fresh vocabulary, offline study, updates waiting for consent, preserved progress, unrelated caches, and mobile layout.");
 } finally {

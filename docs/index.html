@@ -34,11 +34,7 @@
       </nav>
       <button id="install-app" class="install-button" hidden>Install Logamar</button>
       <small id="offline-status" class="offline-status" role="status">Preparing offline study…</small>
-      <a class="related-app" href="https://jonathanvajda.github.io/Reformanda/" target="_blank" rel="noopener">
-        <img src="./icons/reformanda-192.png" width="38" height="38" alt="">
-        <span><strong>Reformanda</strong><small>If you like this app, you may like Reformanda. Study the creeds and confessions!</small></span>
-      </a>
-      
+
     </header>
 
     <main id="app" class="app-shell" tabindex="-1">
@@ -53,6 +49,13 @@
         <button id="update-app">Update app</button>
       </section>
       <p class="muted">Hebrew and Aramaic vocabulary and counts adapted from <a href="https://www.STEPBible.org">STEP Bible</a>, based on work at Tyndale House Cambridge, under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="./data-sources.html">Data sources, attribution, and changes</a>.</p>
+      <aside class="related-app" aria-label="Suggested app">
+        <a class="related-app-link" href="https://jonathanvajda.github.io/Reformanda/" target="_blank" rel="noopener">
+          <img src="./icons/reformanda-192.png" width="48" height="48" alt="">
+          <span><strong>Reformanda</strong><small>If you like this app, you may like Reformanda. Study the creeds and confessions!</small></span>
+        </a>
+        <button class="related-app-dismiss" type="button" aria-label="Dismiss Reformanda suggestion" title="Dismiss suggestion">&times;</button>
+      </aside>
     </footer>
 
     <template id="empty-state-template">
@@ -71,5 +74,6 @@
 
     <script type="module" src="./js/app.js"></script>
     <script type="module" src="./js/pwa.js"></script>
+    <script type="module" src="./js/related-app.js"></script>
   </body>
 </html>
